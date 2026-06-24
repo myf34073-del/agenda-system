@@ -14,13 +14,13 @@ from flask import Flask, request, jsonify, g, send_from_directory
 from flask_cors import CORS
 
 # ──────────────────────────────────────────────
-app = Flask(__name__, static_folder=STATIC_DIR, static_url_path="")
-CORS(app, supports_credentials=True)
-
 BASE_DIR   = os.path.dirname(__file__)
 DB_PATH    = os.path.join(BASE_DIR, "agendas.db")
 STATIC_DIR = os.environ.get("STATIC_DIR", "..")   # Railway 上设为 "."，本地为 ".."
 IS_CLOUD   = os.environ.get("RAILWAY_ENV") or os.environ.get("RENDER")
+
+app = Flask(__name__, static_folder=STATIC_DIR, static_url_path="")
+CORS(app, supports_credentials=True)
 
 # ──────────────────────────────────────────────
 # 数据库连接
