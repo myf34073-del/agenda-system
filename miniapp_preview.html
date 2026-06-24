@@ -1,0 +1,2626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>北京市朝阳区体育局 · 议题全生命周期管理平台 V1.0</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; display: flex; min-height: 100vh; }
+
+/* ===== 左侧导航 ===== */
+.sidebar {
+  width: 220px; background: #001529; color: #fff; display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; overflow-y: auto;
+}
+.sidebar-logo { padding: 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-logo h2 { font-size: 16px; color: #fff; }
+.sidebar-logo p { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+
+.sidebar-section { padding: 8px 0; }
+.sidebar-section-title { font-size: 11px; color: rgba(255,255,255,0.35); padding: 12px 16px 6px; text-transform: uppercase; letter-spacing: 1px; }
+.sidebar-item {
+  display: flex; align-items: center; gap: 10px; padding: 11px 20px;
+  font-size: 14px; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+.sidebar-item:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.sidebar-item.active { color: #fff; background: #1677ff; border-left-color: #69b1ff; }
+.sidebar-item .icon { font-size: 18px; width: 20px; text-align: center; }
+.sidebar-item.reserved { color: rgba(255,255,255,0.3); cursor: default; }
+.sidebar-item.reserved:hover { background: none; }
+.sidebar-item.limited { color: rgba(255,255,255,0.4); cursor: pointer; }
+.sidebar-item.limited:hover { color: #fff; background: rgba(255,120,0,0.15); }
+
+.sidebar-bottom { margin-top: auto; padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.1); }
+.user-avatar { width: 32px; height: 32px; border-radius: 16px; background: #1677ff; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.user-info { display:flex; align-items:center; gap:10px; }
+.user-detail { font-size: 13px; color: rgba(255,255,255,0.85); }
+.user-role { font-size: 11px; color: rgba(255,255,255,0.45); }
+
+/* ===== 主区域 ===== */
+.main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+.topbar {
+  background: #fff; padding: 0 24px; height: 56px; display: flex; align-items: center;
+  justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-title { font-size: 18px; font-weight: 600; color: #333; }
+.topbar-actions { display: flex; align-items: center; gap: 16px; }
+.topbar-time { font-size: 13px; color: #999; }
+
+.page { display: none; padding: 20px 24px; flex: 1; }
+.page.active { display: block; }
+
+/* ===== 首页 ===== */
+.welcome-banner {
+  background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
+  border-radius: 12px; padding: 24px 28px; color: #fff; margin-bottom: 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.welcome-text h2 { font-size: 20px; margin-bottom: 6px; }
+.welcome-text p { font-size: 13px; opacity: 0.85; }
+.welcome-stat { text-align: center; }
+.welcome-stat .num { font-size: 36px; font-weight: 700; }
+.welcome-stat .label { font-size: 13px; opacity: 0.8; }
+
+.card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+.stat-card2 { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: box-shadow 0.2s; }
+.stat-card2:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+.stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.stat-icon.blue { background: #e6f4ff; }
+.stat-icon.orange { background: #fff7e6; }
+.stat-icon.green { background: #f6ffed; }
+.stat-num2 { font-size: 28px; font-weight: 700; color: #333; }
+.stat-label2 { font-size: 13px; color: #999; margin-top: 2px; }
+
+.section-card {
+  background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.section-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+.section-title .more { font-size: 13px; color: #1677ff; cursor: pointer; }
+
+.quick-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+.quick-item {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 20px 12px; background: #f7f9ff; border-radius: 10px; cursor: pointer;
+  transition: all 0.2s;
+}
+.quick-item:hover { background: #e6f4ff; transform: translateY(-2px); }
+.quick-icon { font-size: 28px; }
+.quick-text { font-size: 13px; color: #444; font-weight: 500; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+.topic-table { width: 100%; border-collapse: collapse; }
+.topic-table th { text-align: left; font-size: 13px; color: #999; padding: 10px 12px; border-bottom: 1px solid #f0f0f0; font-weight: 500; }
+.topic-table td { padding: 12px; border-bottom: 1px solid #f9f9f9; font-size: 14px; color: #333; }
+.topic-table tr:hover td { background: #fafafa; cursor: pointer; }
+.topic-table .col-title { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.reserved-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.reserved-item {
+  display: flex; align-items: center; gap: 8px; background: #fafafa;
+  border: 1px dashed #e0e0e0; border-radius: 8px; padding: 12px 16px;
+}
+.reserved-icon { font-size: 18px; opacity: 0.5; }
+.reserved-text { font-size: 13px; color: #bbb; }
+
+/* ===== 表单通用 ===== */
+.form-container { max-width: 960px; margin: 0 auto; }
+.form-container-wide { max-width: 1200px; margin: 0 auto; }
+.form-section { background: #fff; border-radius: 10px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.form-section.reserved { border: 2px dashed #e0e0e0; background: #fafafa; }
+.form-section-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px; }
+.form-row { margin-bottom: 16px; }
+.form-row:last-child { margin-bottom: 0; }
+.form-label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; font-weight: 500; }
+.form-input, .form-textarea, .form-select {
+  width: 100%; border: 1px solid #d9d9d9; border-radius: 6px; padding: 9px 12px;
+  font-size: 14px; color: #333; font-family: inherit; transition: border-color 0.2s;
+  background: #fff; resize: vertical;
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus { border-color: #1677ff; outline: none; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.form-input[readonly] { background: #f5f5f5; color: #999; cursor: default; }
+.form-textarea { min-height: 100px; }
+.form-select { cursor: pointer; }
+.word-count { text-align: right; font-size: 12px; color: #bbb; margin-top: 4px; }
+.form-row-inline { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+.btn-row { display: flex; gap: 12px; justify-content: flex-end; padding: 0; margin-top: 8px; }
+.btn { padding: 9px 24px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-sm { padding: 5px 14px; border-radius: 4px; font-size: 12px; }
+.btn-primary { background: #1677ff; color: #fff; }
+.btn-primary:hover { background: #4096ff; }
+.btn-default { background: #fff; color: #666; border: 1px solid #d9d9d9; }
+.btn-default:hover { border-color: #1677ff; color: #1677ff; }
+.btn-success { background: #52c41a; color: #fff; }
+.btn-success:hover { background: #73d13d; }
+.btn-danger { background: #fff; color: #ff4d4f; border: 1px solid #ff4d4f; }
+.btn-danger:hover { background: #fff2f0; }
+.btn-gray { background: #f5f5f5; color: #bbb; border: 1px solid #e0e0e0; cursor: default; }
+.btn-download { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+.btn-download:hover { background: #d9f7be; }
+
+/* ===== 标签 ===== */
+.tag { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 12px; white-space: nowrap; }
+.tag-draft { background: #f5f5f5; color: #999; }
+.tag-submitted { background: #e6fffb; color: #13c2c2; }
+.tag-dept-review { background: #e6f4ff; color: #1677ff; }
+.tag-office-review { background: #f0f5ff; color: #2f54eb; }
+.tag-reviewed { background: #f6ffed; color: #52c41a; }
+.tag-scheduled { background: #fff7e6; color: #fa8c16; }
+.tag-sched-dept-review { background: #fff0f6; color: #eb2f96; }
+.tag-sched-leader-review { background: #f9f0ff; color: #722ed1; }
+.tag-sched-reviewed { background: #fcffe6; color: #7cb305; }
+.tag-meeting-done { background: #e6fffb; color: #08979c; }
+.tag-archived { background: #f5f5f5; color: #8c8c8c; }
+.tag-rejected { background: #fff2f0; color: #ff4d4f; }
+.tag-abandoned { background: #fff1f0; color: #cf1322; }
+.tag-converted { background: #f9f0ff; color: #722ed1; }
+.tag-review { background: #e6f4ff; color: #1677ff; }
+.tag-pending { background: #fff7e6; color: #fa8c16; }
+.tag-pool { background: #e6fffb; color: #13c2c2; }
+
+.reserved-badge {
+  display: inline-block; background: #fff7e6; color: #fa8c16;
+  border: 1px solid #ffd591; border-radius: 4px; padding: 2px 10px;
+  font-size: 12px; font-weight: 500;
+}
+
+/* ===== 议题模板选择 ===== */
+.template-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.template-card {
+  border: 2px solid #e8e8e8; border-radius: 10px; padding: 20px; text-align: center;
+  cursor: pointer; transition: all 0.2s; background: #fff;
+}
+.template-card:hover { border-color: #91caff; }
+.template-card.selected { border-color: #1677ff; background: #f0f7ff; }
+.template-card .t-icon { font-size: 32px; margin-bottom: 8px; }
+.template-card .t-name { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
+.template-card .t-desc { font-size: 12px; color: #999; }
+
+/* ===== 议题库增强 ===== */
+.search-bar { display: flex; gap: 10px; margin-bottom: 16px; }
+.search-input { flex: 1; border: 1px solid #d9d9d9; border-radius: 6px; padding: 9px 14px; font-size: 14px; }
+.search-input:focus { border-color: #1677ff; outline: none; }
+.search-input-wrapper { position: relative; display: flex; align-items: center; }
+.search-input-wrapper .search-input { width: 100%; padding-right: 38px; }
+.search-icon-btn {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 30px; height: 30px; border: none; background: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #bbb; border-radius: 6px; transition: all 0.2s; padding: 0;
+}
+.search-icon-btn:hover { color: #1677ff; background: rgba(22,119,255,0.08); }
+.search-icon-btn svg { width: 16px; height: 16px; }
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #f0f0f0; align-items: center; }
+.filter-chip {
+  padding: 5px 14px; border-radius: 16px; background: #f5f5f5; color: #666;
+  font-size: 13px; cursor: pointer; transition: all 0.15s; border: none;
+}
+.filter-chip:hover { background: #e6f4ff; color: #1677ff; }
+.filter-chip.active { background: #1677ff; color: #fff; }
+
+/* ===== 拖拽排序 ===== */
+.pool-row { cursor: grab; transition: opacity 0.15s, box-shadow 0.15s; }
+.pool-row:active { cursor: grabbing; }
+.pool-row.dragging { opacity: 0.35; background: #e6f4ff; }
+.pool-row.drop-above { box-shadow: inset 0 2px 0 0 #1677ff; }
+.pool-row.drop-below { box-shadow: inset 0 -2px 0 0 #1677ff; }
+.drag-handle { color: #bbb; cursor: grab; font-size: 15px; user-select: none; line-height: 1; display: inline-block; margin-right: 4px; vertical-align: middle; }
+.drag-handle:active { cursor: grabbing; }
+.filter-sep { color: #ddd; margin: 0 4px; font-size: 13px; }
+.topic-table-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.topic-table-actions .btn { padding: 4px 12px; font-size: 12px; }
+.adv-search-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+.adv-search-row .form-input { width: auto; min-width: 120px; }
+.adv-search-row select { padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; }
+
+/* ===== 议题转换 ===== */
+.convert-card { background: #fff; border-radius: 10px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.convert-flow { display: flex; align-items: center; gap: 24px; margin: 20px 0; }
+.convert-box { flex: 1; border: 1px solid #e0e0e0; border-radius: 10px; padding: 20px; text-align: center; }
+.convert-box.target { border-color: #1677ff; background: #f0f7ff; }
+.convert-box-label { font-size: 12px; color: #999; margin-bottom: 8px; }
+.convert-box-value { font-size: 16px; color: #333; font-weight: 600; }
+.arrow-big { font-size: 32px; color: #1677ff; }
+.convert-preview { background: #f7f9ff; border-radius: 8px; padding: 16px; font-size: 13px; color: #555; line-height: 2; margin-top: 16px; }
+
+.batch-list { max-height: 300px; overflow-y: auto; border: 1px solid #f0f0f0; border-radius: 8px; }
+.batch-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #f9f9f9; cursor: pointer; }
+.batch-item:hover { background: #fafafa; }
+.batch-item:last-child { border-bottom: none; }
+.batch-checkbox { width: 18px; height: 18px; cursor: pointer; accent-color: #1677ff; }
+
+/* ===== 会议纪要 ===== */
+.template-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.template-chip {
+  padding: 7px 16px; border-radius: 16px; border: 1px solid #91caff;
+  background: #e6f4ff; color: #1677ff; font-size: 13px; cursor: pointer; transition: all 0.15s;
+}
+.template-chip:hover, .template-chip.active { background: #1677ff; color: #fff; }
+.template-chip.restricted { border-color: #ffd591; background: #fff7e6; color: #fa8c16; }
+.template-chip.restricted.active { background: #fa8c16; color: #fff; }
+
+/* ===== 上传 ===== */
+.upload-zone {
+  border: 2px dashed #91caff; border-radius: 12px; background: #f0f7ff;
+  padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  cursor: pointer; transition: border-color 0.2s;
+}
+.upload-zone:hover { border-color: #1677ff; }
+.upload-icon { font-size: 48px; }
+.upload-text { font-size: 15px; color: #1677ff; font-weight: 600; }
+.upload-hint { font-size: 12px; color: #999; }
+.upload-formats { display: flex; gap: 8px; }
+.format-badge { background: #e6f4ff; color: #1677ff; border-radius: 4px; padding: 3px 12px; font-size: 12px; }
+
+.info-panel { background: #e6f4ff; border-radius: 8px; padding: 14px; margin-top: 14px; }
+.info-panel p { font-size: 13px; color: #555; margin-bottom: 4px; }
+.info-panel b { color: #1677ff; }
+
+/* ===== 议题池 ===== */
+.pool-period-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.pool-period-card {
+  border: 2px solid #e8e8e8; border-radius: 10px; padding: 18px; cursor: pointer; transition: all 0.2s;
+  background: #fff;
+}
+.pool-period-card:hover { border-color: #91caff; }
+.pool-period-card.active { border-color: #1677ff; background: #f0f7ff; }
+.pool-period-card .pp-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 6px; }
+.pool-period-card .pp-meta { font-size: 12px; color: #999; display: flex; gap: 16px; }
+.pool-actions { display: flex; gap: 8px; margin-bottom: 16px; }
+.pool-drag-hint { font-size: 12px; color: #bbb; margin-bottom: 10px; font-style: italic; }
+
+/* ===== 统计 ===== */
+.stats-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.stat-card-big {
+  background: #fff; border-radius: 10px; padding: 20px; text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.stat-big-num { font-size: 36px; font-weight: 700; color: #1677ff; }
+.stat-big-label { font-size: 13px; color: #999; margin-top: 6px; }
+
+.bar-item { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 13px; }
+.bar-label { width: 80px; color: #666; text-align: right; }
+.bar-outer { flex: 1; height: 12px; background: #f0f0f0; border-radius: 6px; overflow: hidden; }
+.bar-inner { height: 100%; border-radius: 6px; transition: width 0.5s; }
+.bar-val { width: 50px; color: #333; font-weight: 500; }
+
+.dept-table { width: 100%; border-collapse: collapse; }
+.dept-table th, .dept-table td { padding: 10px 12px; text-align: center; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+.dept-table th { color: #999; font-weight: 500; }
+.dept-table th:first-child, .dept-table td:first-child { text-align: left; }
+.rank-badge { display: inline-flex; width: 28px; height: 28px; border-radius: 14px; background: #f0f0f0; color: #999; font-size: 13px; align-items: center; justify-content: center; font-weight: 700; }
+.rank-badge.gold { background: #ffd700; color: #fff; }
+.rank-badge.silver { background: #c0c0c0; color: #fff; }
+.rank-badge.bronze { background: #cd7f32; color: #fff; }
+
+.view-tabs { display: flex; gap: 0; margin-bottom: 20px; background: #fff; border-radius: 8px; overflow: hidden; width: fit-content; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.view-tab { padding: 10px 28px; font-size: 14px; color: #666; cursor: pointer; transition: all 0.15s; }
+.view-tab.active { background: #1677ff; color: #fff; }
+
+.filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: 13px; }
+.date-picker { border: 1px solid #d9d9d9; border-radius: 6px; padding: 6px 10px; }
+
+.reserved-box {
+  background: #fafafa; border: 2px dashed #e0e0e0; border-radius: 10px;
+  padding: 20px; text-align: center; color: #bbb; font-size: 13px;
+}
+.reserved-box .buttons { display: flex; gap: 10px; justify-content: center; margin-top: 12px; }
+
+.success-msg { background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 8px; padding: 14px; margin-top: 14px; display: flex; align-items: center; gap: 10px; }
+.success-msg .sm-emoji { font-size: 20px; }
+.success-msg .sm-text { font-size: 14px; color: #52c41a; font-weight: 500; }
+
+.emergency-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.emergency-urgent { background: #fff2f0; color: #ff4d4f; }
+.emergency-normal { background: #e6f4ff; color: #1677ff; }
+.emergency-low { background: #f5f5f5; color: #999; }
+
+/* ===== Toast ===== */
+#toast {
+  display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.75); color: #fff; padding: 12px 24px; border-radius: 8px;
+  font-size: 14px; z-index: 9999;
+}
+
+/* ===== V1.3 角色切换器 ===== */
+.role-switcher { display: flex; background: #f0f2f5; border-radius: 8px; padding: 3px; }
+.role-tab { padding: 7px 18px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.2s; color: #666; border: none; background: transparent; }
+.role-tab:hover { color: #333; }
+.role-tab.active { background: #1677ff; color: #fff; font-weight: 600; box-shadow: 0 1px 3px rgba(22,119,255,0.3); }
+
+/* ===== V1.3 局领导首页 ===== */
+.leader-batch-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.leader-batch-card {
+  background: #fff; border: 2px solid #e8e8e8; border-radius: 10px; padding: 18px; cursor: pointer; transition: all 0.2s;
+}
+.leader-batch-card:hover { border-color: #faad14; box-shadow: 0 2px 8px rgba(250,173,20,0.15); }
+.leader-batch-card .lb-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 6px; }
+.leader-batch-card .lb-meta { font-size: 12px; color: #999; display: flex; gap: 16px; }
+.leader-batch-card .lb-count { font-size: 13px; color: #fa8c16; font-weight: 600; }
+
+/* ===== V1.3 局领导 双栏预览 ===== */
+.leader-split { display: grid; grid-template-columns: 400px 1fr; gap: 16px; min-height: 520px; }
+.leader-left { border: 1px solid #e8e8e8; border-radius: 8px; overflow-y: auto; max-height: 600px; background: #fff; }
+.leader-left-header { padding: 12px 16px; background: #fafafa; border-bottom: 1px solid #f0f0f0; font-size: 14px; font-weight: 600; color: #333; position: sticky; top: 0; }
+.leader-right { border: 1px solid #e8e8e8; border-radius: 8px; overflow-y: auto; max-height: 600px; background: #fff; }
+.leader-right-header { padding: 12px 16px; background: #fafafa; border-bottom: 1px solid #f0f0f0; font-size: 14px; font-weight: 600; color: #333; position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; }
+.leader-right-body { padding: 20px; font-size: 14px; line-height: 2; color: #333; }
+.leader-topic-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #f9f9f9; cursor: pointer; transition: background 0.15s; }
+.leader-topic-item:hover { background: #fafafa; }
+.leader-topic-item.active { background: #fff7e6; border-left: 3px solid #fa8c16; }
+.leader-topic-item .lt-title { flex: 1; font-size: 14px; color: #333; }
+.leader-topic-item .lt-dept { font-size: 12px; color: #999; white-space: nowrap; }
+.leader-topic-item .lt-status { font-size: 12px; white-space: nowrap; }
+
+/* ===== V1.3 局领导 批示/审批按钮 ===== */
+.leader-approve-bar { background: #fff7e6; border-radius: 8px; padding: 16px 20px; margin-top: 16px; display: flex; align-items: center; gap: 12px; border: 1px solid #ffd591; }
+.leader-approve-bar textarea { flex: 1; border: 1px solid #ffd591; border-radius: 6px; padding: 8px 12px; font-size: 13px; resize: none; height: 48px; font-family: inherit; }
+.leader-approve-bar textarea:focus { outline: none; border-color: #fa8c16; }
+</style>
+</head>
+<body>
+
+<!-- ===== 左侧导航 ===== -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h2>🏟️ 议题全生命周期管理平台</h2>
+    <p>北京市朝阳区体育局 · V1.0</p>
+  </div>
+
+  <div class="sidebar-section" id="sidebar-dept-section">
+    <div class="sidebar-section-title">主要功能</div>
+    <div class="sidebar-item active" id="nav-home" onclick="navigate('home')"><span class="icon">🏠</span>首 页</div>
+    <div class="sidebar-item" id="nav-write" data-role="dept" onclick="navigate('write')"><span class="icon">✏️</span>写议题</div>
+    <div class="sidebar-item" id="nav-upload" data-role="dept" onclick="navigate('upload')"><span class="icon">📄</span>上传议题</div>
+    <div class="sidebar-item" id="nav-convert" data-role="dept" onclick="navigate('convert')"><span class="icon">🔄</span>议题转换（场馆中心）</div>
+    <div class="sidebar-item" id="nav-pool" onclick="navigate('pool')"><span class="icon">📥</span>上会议题（办公室）</div>
+    <div class="sidebar-item" id="nav-minutes" onclick="navigate('minutes')"><span class="icon">📋</span>会议纪要（办公室）</div>
+    <div class="sidebar-item" id="nav-library" data-role="dept" onclick="navigate('library')"><span class="icon">🗂️</span>议题库</div>
+    <div class="sidebar-item" id="nav-stats" onclick="navigate('stats')"><span class="icon">📊</span>数据统计</div>
+  </div>
+
+  <div class="sidebar-section" id="sidebar-reserved-section">
+    <div class="sidebar-section-title">预留功能</div>
+    <div class="sidebar-item reserved"><span class="icon">🔑</span>SSO 统一认证</div>
+    <div class="sidebar-item reserved"><span class="icon">✅</span>审批流转</div>
+    <div class="sidebar-item reserved"><span class="icon">🔔</span>通知提醒</div>
+    <div class="sidebar-item reserved"><span class="icon">⚙️</span>系统管理</div>
+  </div>
+
+  <div class="sidebar-bottom" id="sidebar-dept-user">
+    <div class="user-info" id="sidebarUserInfo" style="cursor:pointer" onclick="toggleSidebarUser()">
+      <div class="user-avatar" id="sidebarAvatar">缪</div>
+      <div>
+        <div class="user-detail" id="sidebarName">场馆中心 缪逸飞</div>
+        <div class="user-role" id="sidebarRole">场馆中心</div>
+      </div>
+    </div>
+    <div id="sidebarLogout" style="display:none;text-align:center;padding:6px 0 0">
+      <button class="btn btn-sm" style="background:#ff4d4f;color:#fff;border:none;width:100%;border-radius:4px;cursor:pointer;font-size:12px" onclick="doLogout()">🚪 退出登录</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== 主区域 ===== -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="pageTitle">首页</div>
+    <div class="topbar-actions">
+      <span class="topbar-time" id="realtimeDate">加载中...</span>
+    </div>
+  </div>
+
+  <!-- ===== Page: 首页 ===== -->
+  <div class="page active" id="page-home">
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <h2>👋 欢迎回来，缪逸飞</h2>
+        <p>体育局 · 您有 2 条待审议题，3 条审核中</p>
+      </div>
+      <div class="welcome-stat">
+        <div class="num">246</div>
+        <div class="label">全局议题总数</div>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div class="stat-card2" onclick="navigate('library');setTimeout(()=>setLibFilter('pending'),200)">
+        <div class="stat-icon blue">✏️</div>
+        <div><div class="stat-num2">2</div><div class="stat-label2">待审议题</div></div>
+      </div>
+      <div class="stat-card2" onclick="navigate('library');setTimeout(()=>setLibFilter('review'),200)">
+        <div class="stat-icon orange">⏳</div>
+        <div><div class="stat-num2">3</div><div class="stat-label2">审核中</div></div>
+      </div>
+      <div class="stat-card2" onclick="navigate('pool')">
+        <div class="stat-icon green">📥</div>
+        <div><div class="stat-num2">5</div><div class="stat-label2">已进入上会议题</div></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="section-card">
+        <div class="section-title">快捷入口</div>
+        <div class="quick-grid">
+          <div class="quick-item" onclick="navigate('write')"><div class="quick-icon">✏️</div><div class="quick-text">写议题</div></div>
+          <div class="quick-item" onclick="navigate('upload')"><div class="quick-icon">📄</div><div class="quick-text">上传议题</div></div>
+          <div class="quick-item" onclick="navigate('convert')"><div class="quick-icon">🔄</div><div class="quick-text">议题转换（体育局）</div></div>
+          <div class="quick-item" onclick="navigate('pool')"><div class="quick-icon">📥</div><div class="quick-text">上会议题</div></div>
+          <div class="quick-item" onclick="navigate('minutes')"><div class="quick-icon">📋</div><div class="quick-text">会议纪要</div></div>
+          <div class="quick-item" onclick="navigate('library')"><div class="quick-icon">🗂️</div><div class="quick-text">议题库</div></div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title">最近议题 <span class="more" onclick="navigate('library')">查看全部 ›</span></div>
+        <table class="topic-table">
+          <tr><th>议题标题</th><th>类型</th><th>状态</th><th>日期</th></tr>
+          <tr><td class="col-title">关于奥林匹克体育中心场馆维修改造项目启动的议题</td><td>启动类</td><td><span class="tag tag-review">审核中</span></td><td>2026-05-28</td></tr>
+          <tr><td class="col-title">关于2026年暑期青少年体育培训项目经费申请的议题</td><td>比选类</td><td><span class="tag tag-pending">待审核</span></td><td>2026-05-30</td></tr>
+          <tr><td class="col-title">关于体育局办公区消防安全设施更新的议题</td><td>招投标类</td><td><span class="tag tag-pool">议题池</span></td><td>2026-05-15</td></tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== Page: 写议题 (V1.1 更新) ===== -->
+  <div class="page" id="page-write">
+    <div class="form-container">
+      <!-- 议题模板选择（V1.1 增加比选/招投标/人事/党建/其他） -->
+      <div class="form-section">
+        <div class="form-section-title">📑 选择议题模板</div>
+        <div class="template-cards" id="templateSelector">
+          <div class="template-card selected" onclick="selTemplate(this,'qidong')">
+            <div class="t-icon">🚀</div>
+            <div class="t-name">启动类议题</div>
+            <div class="t-desc">项目启动、方案审批等</div>
+          </div>
+          <div class="template-card" onclick="selTemplate(this,'bixuan')">
+            <div class="t-icon">📊</div>
+            <div class="t-name">比选类议题</div>
+            <div class="t-desc">方案比选、供应商比较</div>
+          </div>
+          <div class="template-card" onclick="selTemplate(this,'zhaobiao')">
+            <div class="t-icon">🏗️</div>
+            <div class="t-name">招投标类议题</div>
+            <div class="t-desc">招标文件审批、评标结果</div>
+          </div>
+          <div class="template-card" onclick="selTemplate(this,'renshi')">
+            <div class="t-icon">👤</div>
+            <div class="t-name">人事任命类议题</div>
+            <div class="t-desc">人事调整、岗位任命</div>
+          </div>
+          <div class="template-card" onclick="selTemplate(this,'dangjian')">
+            <div class="t-icon">🏛️</div>
+            <div class="t-name">党建工作议题</div>
+            <div class="t-desc">党建活动、组织建设</div>
+          </div>
+          <div class="template-card" onclick="selTemplate(this,'other')">
+            <div class="t-icon">📋</div>
+            <div class="t-name">其他类型议题</div>
+            <div class="t-desc">其他综合类议题</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📝 基本信息</div>
+        <div class="form-row">
+          <label class="form-label">议题标题 <span style="color:#ff4d4f">*</span></label>
+          <input id="topicTitle" class="form-input" placeholder="请输入议题标题（限100字）" />
+        </div>
+        <div class="form-row-inline">
+          <div class="form-row">
+            <label class="form-label">提报部门</label>
+            <input class="form-input" value="场馆中心" readonly />
+          </div>
+          <div class="form-row">
+            <label class="form-label">议题类型</label>
+            <select id="topicCategory" class="form-select">
+              <option value="行政事项">行政事项</option>
+              <option value="三重一大">三重一大</option>
+              <option value="党建工作">党建工作</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row-inline">
+          <div class="form-row">
+            <label class="form-label">涉及金额（万元）</label>
+            <input id="topicAmount" class="form-input" type="number" placeholder="0.00（选填）" style="max-width:260px" />
+          </div>
+          <div class="form-row">
+            <label class="form-label">摘要（选填）</label>
+            <input id="topicSummary" class="form-input" placeholder="一句话摘要（选填）" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📌 议题背景</div>
+        <div class="form-row">
+          <textarea id="topicBackground" class="form-textarea" placeholder="请填写议题背景及必要性（建议100-300字）" rows="4" oninput="updateWordCount(this,'wc1')"></textarea>
+          <div class="word-count"><span id="wc1">0</span>/500字</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📄 主要内容</div>
+        <div class="form-row">
+          <textarea id="topicContent" class="form-textarea" placeholder="请详细描述议题主要内容（建议300-1000字）" rows="6" oninput="updateWordCount(this,'wc2')"></textarea>
+          <div class="word-count"><span id="wc2">0</span>/2000字</div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">✅ 拟请事项</div>
+        <div class="form-row">
+          <textarea class="form-textarea" placeholder="请填写需要领导审议的具体请示事项" rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="form-section reserved">
+        <div class="form-section-title" style="color:#bbb;border-color:#f0f0f0">📎 附件上传 <span class="reserved-badge">预留接口</span></div>
+        <div class="reserved-box">附件关联功能建设中</div>
+      </div>
+
+      <!-- V1.1 新增：提交后下载功能 -->
+      <div class="btn-row">
+        <button class="btn btn-default" onclick="navigate('home')">取消</button>
+        <button class="btn btn-default" onclick="saveNewAgenda().then(()=>showToast('草稿已保存到数据库'))">💾 存草稿</button>
+        <button class="btn btn-primary" onclick="onTopicSubmitDB()">✅ 提交审核</button>
+      </div>
+      <div id="submitDownloadBox" class="success-msg" style="display:none">
+        <span class="sm-emoji">✅</span>
+        <span class="sm-text">议题已提交成功！已保存到数据库。</span>
+        <button class="btn btn-download btn-sm" onclick="showPage('page-agendas')">📋 查看议题列表</button>
+      </div>
+    </div>
+  </div>
+  <!-- ===== Page: 上传议题 (V1.2 重写) ===== -->
+  <div class="page" id="page-upload">
+    <div class="form-container-wide">
+      <!-- 上传区 -->
+      <div class="form-section" id="uploadZone">
+        <div class="form-section-title">📤 上传议题文件</div>
+        <div class="upload-zone" onclick="onUploadFileV2()">
+          <div class="upload-icon" id="uploadIcon2">📁</div>
+          <div class="upload-text" id="uploadStatus2">点击选择议题文件（支持Word/WPS）</div>
+          <div class="upload-hint">系统将自动识别并拆分多议题文档</div>
+          <div class="upload-formats">
+            <span class="format-badge">DOCX</span><span class="format-badge">DOC</span><span class="format-badge">WPS</span>
+          </div>
+        </div>
+        <div class="info-panel">
+          <p>📌 文件命名规范：<b>YYYYMMDD_部门名_议题简称.docx</b></p>
+          <p style="color:#fa8c16;margin-top:4px">示例：20260601_场馆中心_场馆维修议题.docx</p>
+          <p style="color:#1677ff;margin-top:4px">📌 支持一个文件包含多个议题，系统将自动拆分</p>
+        </div>
+      </div>
+
+      <!-- 拆分预览区（上传后显示） -->
+      <div id="uploadSplitView" style="display:none">
+        <div class="form-section">
+          <div class="form-section-title">📑 议题拆分预览 <span style="font-size:12px;color:#999;font-weight:400">— 系统已自动拆分为 3 个独立议题</span></div>
+          <div style="display:grid;grid-template-columns:380px 1fr;gap:16px;min-height:480px">
+            <!-- 左栏：议题列表 -->
+            <div style="border:1px solid #e8e8e8;border-radius:8px;overflow-y:auto;max-height:500px">
+              <div style="padding:10px 14px;background:#fafafa;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600;color:#666">议题列表 · 待确认</div>
+              <div class="batch-item" onclick="selectSplitTopic(this, 0)" style="background:#f0f7ff;cursor:pointer" id="split-item-0">
+                <div style="flex:1">
+                  <div style="font-size:14px;color:#333;font-weight:500">关于奥林匹克体育中心场馆维修改造项目启动的议题</div>
+                  <div style="font-size:12px;color:#999;margin-top:4px">场馆中心 · 启动类 · 约85万元 · 预估3页</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();editSplitTopic(0)" title="编辑议题内容">✏️ 编辑</button>
+                  <span class="tag tag-pending">待确认</span>
+                </div>
+              </div>
+              <div class="batch-item" onclick="selectSplitTopic(this, 1)" style="cursor:pointer" id="split-item-1">
+                <div style="flex:1">
+                  <div style="font-size:14px;color:#333;font-weight:500">关于2026年暑期青少年体育培训项目经费申请的议题</div>
+                  <div style="font-size:12px;color:#999;margin-top:4px">青少科 · 比选类 · 约32万元 · 预估2页</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();editSplitTopic(1)" title="编辑议题内容">✏️ 编辑</button>
+                  <span class="tag tag-pending">待确认</span>
+                </div>
+              </div>
+              <div class="batch-item" onclick="selectSplitTopic(this, 2)" style="cursor:pointer" id="split-item-2">
+                <div style="flex:1">
+                  <div style="font-size:14px;color:#333;font-weight:500">关于体育局办公区消防安全设施更新的议题</div>
+                  <div style="font-size:12px;color:#999;margin-top:4px">场馆中心 · 招投标类 · 约18万元 · 预估1页</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();editSplitTopic(2)" title="编辑议题内容">✏️ 编辑</button>
+                  <span class="tag tag-pending">待确认</span>
+                </div>
+              </div>
+            </div>
+            <!-- 右栏：议题内容预览（可编辑） -->
+            <div style="border:1px solid #e8e8e8;border-radius:8px;overflow-y:auto;max-height:500px">
+              <div style="padding:10px 14px;background:#fafafa;border-bottom:1px solid #f0f0f0;font-size:13px;font-weight:600;color:#666;display:flex;justify-content:space-between;align-items:center">
+                <span>议题内容预览</span>
+                <button class="btn btn-primary btn-sm" onclick="toggleEditMode()" id="toggleEditBtn">✏️ 编辑模式</button>
+              </div>
+              <div id="splitPreviewContent" style="padding:16px;font-size:14px;color:#333;line-height:2">
+                <input class="form-input" style="font-weight:600;font-size:15px;margin-bottom:12px;color:#1677ff;border:none;background:transparent;width:100%" value="关于奥林匹克体育中心场馆维修改造项目启动的议题" id="editSplitTitle" readonly>
+                <div style="margin-bottom:8px"><b>提报部门：</b><input class="form-input" style="width:150px;display:inline;padding:2px 6px" value="场馆中心" id="editSplitDept" readonly></div>
+                <div style="margin-bottom:8px"><b>议题类型：</b>
+                  <select class="form-select" style="width:120px;display:inline;padding:2px 6px" id="editSplitType" disabled>
+                    <option>启动类</option><option>比选类</option><option>招投标类</option><option>人事任命类</option><option>党建工作</option><option>其他类型</option>
+                  </select>
+                </div>
+                <div style="margin-bottom:8px"><b>涉及金额：</b><input class="form-input" style="width:100px;display:inline;padding:2px 6px" value="85" id="editSplitAmount" readonly> 万元</div>
+                <div style="margin-bottom:8px"><b>上会时间：</b>
+                  <select class="form-select" style="width:220px;display:inline;padding:2px 6px" id="editSplitMeeting" disabled>
+                    <option value="">— 选择上会时间 —</option>
+                    <option>2026年6月5日（第22次局长办公会）</option>
+                    <option>2026年6月19日（第23次局长办公会）</option>
+                    <option>2026年7月3日（第24次局长办公会）</option>
+                  </select>
+                </div>
+                <hr style="border:none;border-top:1px dashed #e0e0e0;margin:12px 0">
+                <div style="margin-bottom:8px"><b>议题背景：</b></div>
+                <p style="color:#666;margin-bottom:12px"><textarea class="form-textarea" rows="3" style="width:100%" id="editSplitBg" readonly>奥林匹克体育中心场馆设施自2018年投入使用以来，部分设备老化严重，游泳馆恒温系统故障频发，篮球馆地面磨损超标，已影响正常训练和赛事承办。为确保场馆安全运行，拟启动维修改造项目。</textarea></p>
+                <div style="margin-bottom:8px"><b>主要建设内容：</b></div>
+                <textarea class="form-textarea" rows="4" style="width:100%;margin-bottom:12px" id="editSplitDetail" readonly>1. 游泳馆恒温系统整体更换
+2. 篮球馆运动地板翻新
+3. 场馆消防设施升级改造
+4. 观众看台安全护栏更换</textarea>
+                <div style="margin-bottom:4px"><b>拟请事项：</b></div>
+                <textarea class="form-textarea" rows="2" style="width:100%;color:#666" id="editSplitAsk" readonly>请局领导审议批准奥林匹克体育中心场馆维修改造项目启动，项目预算85万元。</textarea>
+                <div class="info-panel" style="margin-top:16px">
+                  <p style="font-size:12px;color:#52c41a">✅ 系统已自动修正：标题格式化、部门匹配、金额格式统一</p>
+                  <p style="font-size:12px;color:#fa8c16;margin-top:4px">⚠️ 请在确认前仔细核对议题内容，如有误可手动编辑</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="btn-row">
+          <button class="btn btn-default" onclick="resetUpload()">取消</button>
+          <button class="btn btn-default" onclick="showToast('已暂存全部待确认议题')">暂 存</button>
+          <button class="btn btn-download" onclick="showToast('全部议题已下载为公文规范格式（.docx）')">📥 下载全部</button>
+          <button class="btn btn-primary" onclick="onUploadSubmit()">提交全部议题</button>
+        </div>
+        <div id="uploadSplitSuccess" class="success-msg" style="display:none">
+          <span class="sm-emoji">✅</span>
+          <span class="sm-text" id="uploadSplitMsg">全部 3 条议题已提交审核！</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Page: 议题转换（场馆中心）(V1.2 更新) ===== -->
+  <div class="page" id="page-convert">
+    <div class="form-container">
+      <div class="form-section">
+        <div class="form-section-title">🔄 议题转换（场馆中心） <span style="font-size:12px;color:#999;font-weight:400">（主任办公会 → 局长办公会）</span></div>
+        <div class="form-row">
+          <label class="form-label">选择待转换议题（支持多选批量转换）</label>
+          <div class="batch-list">
+            <div class="batch-item">
+              <input type="checkbox" class="batch-checkbox" id="conv1" onchange="convCount()">
+              <div style="flex:1">
+                <span>关于奥林匹克体育中心场馆维修改造项目启动的议题</span>
+                <span style="color:#999;font-size:12px;margin-left:8px">85万元</span>
+              </div>
+              <select class="form-select" style="width:280px;font-size:12px;padding:4px 8px" id="convTime1">
+                <option value="">— 选择主任办公会时间 —</option>
+                <option>2026年5月15日（第16期）主任办公会</option>
+                <option selected>2026年5月28日（第17期）主任办公会</option>
+                <option>2026年6月4日（第18期）主任办公会</option>
+              </select>
+            </div>
+            <div class="batch-item">
+              <input type="checkbox" class="batch-checkbox" id="conv2" onchange="convCount()">
+              <div style="flex:1">
+                <span>关于2026年暑期青少年体育培训项目经费申请的议题</span>
+                <span style="color:#999;font-size:12px;margin-left:8px">32万元</span>
+              </div>
+              <select class="form-select" style="width:280px;font-size:12px;padding:4px 8px" id="convTime2">
+                <option value="">— 选择主任办公会时间 —</option>
+                <option>2026年5月28日（第17期）主任办公会</option>
+                <option selected>2026年6月4日（第18期）主任办公会</option>
+                <option>2026年6月11日（第19期）主任办公会</option>
+              </select>
+            </div>
+            <div class="batch-item">
+              <input type="checkbox" class="batch-checkbox" id="conv3" onchange="convCount()">
+              <div style="flex:1">
+                <span>关于更新体育局官方网站及APP的议题</span>
+                <span style="color:#999;font-size:12px;margin-left:8px">45万元</span>
+              </div>
+              <select class="form-select" style="width:280px;font-size:12px;padding:4px 8px" id="convTime3">
+                <option value="">— 选择主任办公会时间 —</option>
+                <option selected>2026年5月20日（第17期）主任办公会</option>
+                <option>2026年6月4日（第18期）主任办公会</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:13px;color:#999">已选 <b id="convSelected">0</b> 条</div>
+        </div>
+        <div class="convert-flow">
+          <div class="convert-box"><div class="convert-box-label">转换前</div><div class="convert-box-value">主任办公会议题</div></div>
+          <div class="arrow-big">→</div>
+          <div class="convert-box target"><div class="convert-box-label">转换后</div><div class="convert-box-value" style="color:#1677ff">局长办公会议题</div></div>
+        </div>
+        <div class="info-panel">
+          <p>📌 转换后议题将自动提交至<b>场馆中心部门负责人</b>审核</p>
+          <p>📌 此功能仅<b>场馆中心</b>可用</p>
+        </div>
+        <div class="btn-row" style="justify-content:flex-start">
+          <button class="btn btn-primary" onclick="onConvert()">开始转换</button>
+          <button class="btn btn-download" onclick="showToast('批量下载已完成（公文规范格式）')">📥 批量下载</button>
+        </div>
+        <div id="convertResult" class="success-msg" style="display:none">
+          <span class="sm-emoji">✅</span>
+          <span class="sm-text" id="convertResultText">转换已完成，已生成长局办公会议题文件</span>
+        </div>
+      </div>
+
+      <!-- V1.1 新增预留：党委会议题转换 -->
+      <div class="form-section reserved">
+        <div class="form-section-title" style="color:#bbb;border-color:#f0f0f0">🏛️ 转换为党委会议题 <span class="reserved-badge">预留接口</span></div>
+        <div class="reserved-box">党委会议题转换功能待后续开发</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Page: 上会议题 (V1.2 改名并增强) ===== -->
+  <div class="page" id="page-pool">
+    <div class="form-container-wide">
+
+      <div class="section-card">
+        <div class="section-title">📥 局长办公会上会议题 · 按期分类</div>
+        
+        <!-- 搜索框 + 筛选下拉 -->
+        <div class="search-bar" style="margin-bottom:14px">
+          <input class="search-input" id="poolSearchInput" placeholder="🔍 搜索议题标题..." oninput="renderPoolTable()" style="flex:2">
+          <select class="form-select" id="poolDeptFilter" style="width:120px" onchange="renderPoolTable()">
+            <option value="">全部部门</option><option>场馆中心</option><option>局办公室</option><option>组织人事科</option><option>群体科</option><option>市场科</option><option>财审科</option><option>青少科</option><option>第一体校</option><option>第二体校</option><option>第三体校</option><option>产业中心</option><option>体产中心</option>
+          </select>
+          <select class="form-select" id="poolTypeFilter" style="width:110px" onchange="renderPoolTable()">
+            <option value="">全部类型</option><option>启动类</option><option>比选类</option><option>招投标类</option><option>人事任命类</option><option>党建工作</option><option>其他类型</option>
+          </select>
+          <select class="form-select" id="poolUrgencyFilter" style="width:100px" onchange="renderPoolTable()">
+            <option value="">全部紧急程度</option><option>紧急</option><option>普通</option><option>缓办</option>
+          </select>
+        </div>
+
+        <!-- 按期次分类 -->
+        <div class="pool-period-cards">
+          <div class="pool-period-card active" onclick="selectPoolPeriod(this,'2026-06-05')">
+            <div class="pp-title">第22次局长办公会</div>
+            <div class="pp-meta"><span>🕐 2026-06-05</span><span>📋 <span id="poolCount22">5</span>条议题</span></div>
+          </div>
+          <div class="pool-period-card" onclick="selectPoolPeriod(this,'2026-06-19')">
+            <div class="pp-title">第23次局长办公会</div>
+            <div class="pp-meta"><span>🕐 2026-06-19</span><span>📋 <span id="poolCount23">3</span>条议题</span></div>
+          </div>
+          <div class="pool-period-card" onclick="selectPoolPeriod(this,'2026-07-03')">
+            <div class="pp-title">第24次局长办公会</div>
+            <div class="pp-meta"><span>🕐 2026-07-03</span><span>📋 <span id="poolCount24">2</span>条议题</span></div>
+          </div>
+        </div>
+
+        <div class="pool-actions">
+          <span style="margin-left:auto"></span>
+          <button class="btn btn-download btn-sm" onclick="showToast('已批量导出第' + (_currentPoolPeriod==='2026-06-05'?'22':_currentPoolPeriod==='2026-06-19'?'23':'24') + '次局长办公会议题单和议题内容（.docx）')">📥 批量导出议题单和议题内容</button>
+        </div>
+
+        <!-- 议题列表 -->
+        <table class="topic-table" id="poolTable">
+          <thead>
+            <tr>
+              <th style="width:30px"><input type="checkbox" onclick="poolToggleAll(this)"></th>
+              <th>议题标题</th><th>提交部门</th><th>类型</th><th>紧急程度</th><th>金额（万元）</th><th>提交时间</th><th>调整归属</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="poolTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Page: 会议纪要 (V1.1 重写) ===== -->
+  <div class="page" id="page-minutes">
+    <div class="form-container">
+      <div class="form-section">
+        <div class="form-section-title">📋 选择纪要模板</div>
+        <div class="template-chips">
+          <div class="template-chip restricted active" id="tpl-venue" onclick="selMinTemplate(this,'venue')">🏟️ 场馆中心会议纪要模板</div>
+          <div class="template-chip" onclick="selMinTemplate(this,'director')">📋 局长办公会纪要模板</div>
+          <div class="template-chip" onclick="selMinTemplate(this,'party')">🏛️ 党委会纪要模板</div>
+          <div class="template-chip" onclick="selMinTemplate(this,'other')">📝 其他</div>
+        </div>
+        <p style="font-size:11px;color:#fa8c16;margin-top:-10px;margin-bottom:16px">🏟️ 场馆中心模板仅场馆中心工作人员可见和使用</p>
+
+        <!-- V1.1 新增：议题池下拉 + 复选框选择议题 -->
+        <div class="form-row">
+          <label class="form-label">📥 选择议题池期次（自动加载该期议题）</label>
+          <select class="form-select" id="poolBatchSelect" onchange="onPoolBatchSelect()">
+            <option value="">— 请选择议题池期次 —</option>
+            <option value="2026-06-05">第22次局长办公会（2026-06-05）</option>
+            <option value="2026-06-19">第23次局长办公会（2026-06-19）</option>
+            <option value="2026-07-03">第24次局长办公会（2026-07-03）</option>
+          </select>
+        </div>
+        <div id="poolTopicList" style="display:none;border:1px solid #e8e8e8;border-radius:8px;padding:12px;margin-bottom:16px;max-height:240px;overflow-y:auto">
+          <div style="font-size:13px;color:#666;margin-bottom:8px">该期议题列表（勾选后纳入会议纪要）：</div>
+          <div class="batch-item"><input type="checkbox" class="batch-checkbox"><span>关于奥林匹克体育中心场馆维修改造项目启动的议题</span><span style="margin-left:auto;color:#999;font-size:12px">85万元</span></div>
+          <div class="batch-item"><input type="checkbox" class="batch-checkbox"><span>关于2026年暑期青少年体育培训项目经费申请的议题</span><span style="margin-left:auto;color:#999;font-size:12px">32万元</span></div>
+          <div class="batch-item"><input type="checkbox" class="batch-checkbox"><span>关于体育局信息化系统升级改造的议题</span><span style="margin-left:auto;color:#999;font-size:12px">120万元</span></div>
+          <div class="batch-item"><input type="checkbox" class="batch-checkbox"><span>关于第一体校训练场地修缮的议题</span><span style="margin-left:auto;color:#999;font-size:12px">55万元</span></div>
+          <div class="batch-item"><input type="checkbox" class="batch-checkbox"><span>关于全民健身活动组织经费的议题</span><span style="margin-left:auto;color:#999;font-size:12px">38万元</span></div>
+        </div>
+
+        <div class="form-row-inline">
+          <div class="form-row">
+            <label class="form-label">会议日期 <span style="color:#ff4d4f">*</span></label>
+            <input class="form-input" type="date" value="2026-06-05" />
+          </div>
+          <div class="form-row">
+            <label class="form-label">会议地点</label>
+            <input class="form-input" placeholder="如：朝阳区体育局三楼会议室" />
+          </div>
+        </div>
+        <div class="form-row-inline">
+          <div class="form-row">
+            <label class="form-label">主持人</label>
+            <input class="form-input" placeholder="主持人姓名" />
+          </div>
+          <div class="form-row">
+            <label class="form-label">记录人</label>
+            <input class="form-input" placeholder="记录人姓名" />
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">出席人员</label>
+          <textarea class="form-textarea" rows="2" placeholder="请填写出席会议人员名单"></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📝 会议内容</div>
+        <div class="template-chips" style="margin-bottom:12px">
+          <span style="font-size:12px;color:#fa8c16">🏟️ 场馆中心模板 · 手动填写 | </span>
+          <span style="font-size:12px;color:#999;cursor:pointer" onclick="showToast('已从议题池加载议题内容到纪要')">📥 从议题池导入</span>
+        </div>
+        <div class="form-row">
+          <textarea class="form-textarea" rows="10" placeholder="请输入会议纪要正文内容：&#10;一、会议议程&#10;二、讨论情况&#10;三、会议决定"></textarea>
+        </div>
+      </div>
+
+      <div class="form-section reserved">
+        <div class="form-section-title" style="color:#bbb;border-color:#f0f0f0">✅ 纪要审批与签发 <span class="reserved-badge">预留</span></div>
+        <div class="reserved-box">审批签发及自动分发功能建设中</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-default" onclick="onMinutesDraft()">暂 存</button>
+        <button class="btn btn-primary" onclick="onMinutesSubmit()">提 交</button>
+      </div>
+      <div id="minutesSavedBox" class="success-msg" style="display:none">
+        <span class="sm-emoji">✅</span>
+        <span class="sm-text">会议纪要已保存！已关联 3 条议题</span>
+        <button class="btn btn-download btn-sm" onclick="showToast('纪要文件已按规范格式下载')">📥 下载</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Page: 议题库 (V1.3 重构) ===== -->
+  <div class="page" id="page-library">
+    <div class="form-container-wide">
+      <!-- 会议批次下拉框 · 最上方 -->
+      <div class="section-card" style="margin-bottom:12px">
+        <div class="search-bar">
+          <label style="font-size:14px;font-weight:600;white-space:nowrap;color:#333">📋 会议批次：</label>
+          <select class="form-select" id="libBatchSelect" style="width:220px;font-size:14px;font-weight:600" onchange="setLibBatch(this, this.value)">
+            <option value="all">全部会议批次</option>
+            <option value="2026-06-05">第22次局长办公会（2026-06-05）</option>
+            <option value="2026-06-19">第23次局长办公会（2026-06-19）</option>
+            <option value="2026-07-03">第24次局长办公会（2026-07-03）</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 搜索 + 状态筛选 -->
+      <div class="section-card" style="margin-bottom:12px">
+        <div class="search-bar">
+          <div class="search-input-wrapper" style="flex:2">
+            <input class="search-input" id="libSearchInput" placeholder="全文检索 — 搜索议题标题、正文内容、关键词..." oninput="libFilter()" />
+            <button class="search-icon-btn" onclick="libFilter()" title="搜索">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+          </div>
+          <label style="font-size:13px;font-weight:600;white-space:nowrap;color:#333">议题状态：</label>
+          <select class="form-select" id="libStatusSelect" style="width:180px" onchange="libFilter()">
+            <option value="">全部状态</option>
+            <option value="草稿">草稿</option>
+            <option value="提交版">提交版</option>
+            <option value="部门领导审核中">部门领导审核中</option>
+            <option value="局办领导审核中">局办领导审核中</option>
+            <option value="已审核">已审核</option>
+            <option value="上会排期">上会排期</option>
+            <option value="排期议题局办领导初审">排期议题局办领导初审</option>
+            <option value="排期议题局领导审核">排期议题局领导审核</option>
+            <option value="排期议题已审核">排期议题已审核</option>
+            <option value="已上会">已上会</option>
+            <option value="已归档">已归档</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 二级筛选：部门/类型/日期/金额 -->
+      <div class="section-card" style="margin-bottom:12px">
+        <div class="adv-search-row">
+          <select class="form-select" id="libDeptFilter" style="width:130px" onchange="libFilter()">
+            <option value="">全部部门</option><option>场馆中心</option><option>局办公室</option><option>组织人事科</option><option>群体科</option><option>市场科</option><option>财审科</option><option>青少科</option><option>第一体校</option><option>第二体校</option><option>第三体校</option><option>产业中心</option><option>体产中心</option>
+          </select>
+          <select class="form-select" id="libTypeFilter" style="width:130px" onchange="libFilter()">
+            <option value="">全部类型</option><option>启动类</option><option>比选类</option><option>招投标类</option><option>人事任命类</option><option>党建工作</option><option>其他类型</option>
+          </select>
+          <input type="date" id="libDateFrom" class="form-input" style="width:145px" title="开始日期" onchange="libFilter()" />
+          <span style="color:#999">至</span>
+          <input type="date" id="libDateTo" class="form-input" style="width:145px" title="结束日期" onchange="libFilter()" />
+          <input type="number" id="libAmtMin" class="form-input" style="width:100px" placeholder="金额下限" onchange="libFilter()" />
+          <span style="color:#999">—</span>
+          <input type="number" id="libAmtMax" class="form-input" style="width:100px" placeholder="金额上限" onchange="libFilter()" />
+        </div>
+      </div>
+
+      <!-- 表格区域 -->
+      <div class="section-card" style="padding:0;overflow:hidden">
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f0f0f0">
+          <span style="font-size:13px;color:#666">共 <b id="agendaTotalCount">-</b> 条议题</span>
+          <span style="margin-left:auto;color:#999;font-size:12px">场馆中心 · 本部门议题</span>
+          <button class="btn btn-primary btn-sm" onclick="if(_token)refreshAgendaList();else showLoginModal()">🔄 从数据库刷新</button>
+          <button class="btn btn-default btn-sm" onclick="navigate('write')">✏️ 新建议题</button>
+          <button class="btn btn-download btn-sm" onclick="showToast('已导出当前筛选状态下全部议题目录（Excel）')">📑 批量导出议题目录</button>
+        </div>
+        <table class="topic-table" id="agendaMainTable">
+          <thead>
+            <tr>
+              <th style="width:32px"></th><th>编号</th><th>议题标题</th><th>部门</th><th>状态</th><th>金额</th><th>提报人</th><th>日期</th><th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="agendaListTbody">
+            <tr><td colspan="9" style="text-align:center;padding:40px;color:#bbb">点击上方"从数据库刷新"加载真实数据，或先登录</td></tr>
+          </tbody>
+        </table>
+        <!-- 保留原始静态示例（折叠） -->
+        <details style="padding:12px 16px;border-top:1px dashed #e0e0e0">
+          <summary style="font-size:12px;color:#bbb;cursor:pointer">展开静态示例数据（11级状态流 · 仅供演示）</summary>
+          <table class="topic-table" style="margin-top:8px">
+          <thead><tr><th>状态</th><th>议题标题</th><th>类型</th><th>提交部门</th><th>提报人</th><th>日期</th><th>金额</th><th>会议批次</th><th>操作</th></tr></thead>
+          <tbody>
+            <!-- 1. 草稿 -->
+            <tr><td><span class="tag tag-draft">草稿</span></td><td class="col-title">关于朝阳区第十届全民健身运动会筹备方案的议题</td><td>其他类型</td><td>场馆中心</td><td>缪逸飞</td><td>2026-06-09</td><td>56万元</td><td>—</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">编辑</button><button class="btn btn-danger btn-sm" onclick="onAbolish(this)">废止</button></td></tr>
+            <tr><td><span class="tag tag-draft">草稿</span></td><td class="col-title">关于体育局大楼空调系统维修方案的议题</td><td>启动类</td><td>场馆中心</td><td>赵强</td><td>2026-06-08</td><td>22万元</td><td>—</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">编辑</button><button class="btn btn-danger btn-sm" onclick="onAbolish(this)">废止</button></td></tr>
+            <!-- 2. 提交版 -->
+            <tr><td><span class="tag tag-submitted">提交版</span></td><td class="col-title">关于2026年暑期青少年体育培训项目经费申请的议题</td><td>比选类</td><td>青少科</td><td>李娜</td><td>2026-06-07</td><td>32万元</td><td>—</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button><button class="btn btn-default btn-sm">导出</button></td></tr>
+            <tr><td><span class="tag tag-submitted">提交版</span></td><td class="col-title">关于第三体校游泳馆水处理系统升级的议题</td><td>招投标类</td><td>第三体校</td><td>陈刚</td><td>2026-06-06</td><td>68万元</td><td>—</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button><button class="btn btn-default btn-sm">导出</button></td></tr>
+            <!-- 3. 部门领导审核中 -->
+            <tr><td><span class="tag tag-dept-review">部门领导审核中</span></td><td class="col-title">关于奥林匹克体育中心场馆维修改造项目启动的议题</td><td>启动类</td><td>场馆中心</td><td>缪逸飞</td><td>2026-06-05</td><td>85万元</td><td>—</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button><button class="btn btn-default btn-sm">导出</button></td></tr>
+            <tr><td><span class="tag tag-dept-review">部门领导审核中</span></td><td class="col-title">关于体育产业孵化基地装修工程方案的议题</td><td>启动类</td><td>产业中心</td><td>周涛</td><td>2026-06-04</td><td>150万元</td><td>—</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button></td></tr>
+            <!-- 4. 局办领导审核中 -->
+            <tr><td><span class="tag tag-office-review">局办领导审核中</span></td><td class="col-title">关于体育局信息化系统升级改造的议题</td><td>招投标类</td><td>局办公室</td><td>张明</td><td>2026-06-03</td><td>120万元</td><td>—</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button><button class="btn btn-default btn-sm">导出</button></td></tr>
+            <tr><td><span class="tag tag-office-review">局办领导审核中</span></td><td class="col-title">关于全局固定资产清查工作方案的议题</td><td>其他类型</td><td>财审科</td><td>刘洋</td><td>2026-06-02</td><td>—</td><td>—</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button></td></tr>
+            <!-- 5. 已审核 -->
+            <tr><td><span class="tag tag-reviewed">已审核</span></td><td class="col-title">关于第一体校训练场地修缮的议题</td><td>启动类</td><td>第一体校</td><td>孙磊</td><td>2026-06-01</td><td>55万元</td><td>—</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button><button class="btn btn-default btn-sm">导出</button></td></tr>
+            <tr><td><span class="tag tag-reviewed">已审核</span></td><td class="col-title">关于全民健身设施巡检维护外包方案的议题</td><td>比选类</td><td>群体科</td><td>黄丽</td><td>2026-05-31</td><td>28万元</td><td>—</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button></td></tr>
+            <!-- 6. 上会排期 -->
+            <tr><td><span class="tag tag-scheduled">上会排期</span></td><td class="col-title">关于全民健身活动组织经费的议题</td><td>其他类型</td><td>群体科</td><td>黄丽</td><td>2026-05-30</td><td>38万元</td><td>第24次局长办公会</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button><button class="btn btn-default btn-sm">导出</button></td></tr>
+            <tr><td><span class="tag tag-scheduled">上会排期</span></td><td class="col-title">关于体育局2026年度人才引进计划的议题</td><td>人事任命类</td><td>组织人事科</td><td>马超</td><td>2026-05-29</td><td>—</td><td>第23次局长办公会</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button></td></tr>
+            <!-- 7. 排期议题局办领导初审 -->
+            <tr><td><span class="tag tag-sched-dept-review">排期议题局办领导初审</span></td><td class="col-title">关于第二体校田径场塑胶跑道更换的议题</td><td>启动类</td><td>第二体校</td><td>王伟</td><td>2026-05-28</td><td>200万元</td><td>第23次局长办公会</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button><button class="btn btn-default btn-sm">导出</button></td></tr>
+            <tr><td><span class="tag tag-sched-dept-review">排期议题局办领导初审</span></td><td class="col-title">关于体育公园智能化改造方案的议题</td><td>招投标类</td><td>体产中心</td><td>吴芳</td><td>2026-05-27</td><td>300万元</td><td>第23次局长办公会</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button></td></tr>
+            <!-- 8. 排期议题局领导审核 -->
+            <tr><td><span class="tag tag-sched-leader-review">排期议题局领导审核</span></td><td class="col-title">关于更新体育局官方网站及APP的议题</td><td>招投标类</td><td>局办公室</td><td>张明</td><td>2026-05-25</td><td>45万元</td><td>第22次局长办公会</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button><button class="btn btn-default btn-sm">导出</button></td></tr>
+            <tr><td><span class="tag tag-sched-leader-review">排期议题局领导审核</span></td><td class="col-title">关于与区教委联合开展学校体育共建的议题</td><td>党建工作</td><td>青少科</td><td>李娜</td><td>2026-05-24</td><td>60万元</td><td>第22次局长办公会</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button></td></tr>
+            <!-- 9. 排期议题已审核 -->
+            <tr><td><span class="tag tag-sched-reviewed">排期议题已审核</span></td><td class="col-title">关于体育局2026年党建工作要点的议题</td><td>党建工作</td><td>组织人事科</td><td>马超</td><td>2026-05-22</td><td>—</td><td>第22次局长办公会</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button><button class="btn btn-default btn-sm">导出</button></td></tr>
+            <tr><td><span class="tag tag-sched-reviewed">排期议题已审核</span></td><td class="col-title">关于朝阳体育中心南区功能提升方案的议题</td><td>启动类</td><td>产业中心</td><td>周涛</td><td>2026-05-20</td><td>180万元</td><td>第22次局长办公会</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button></td></tr>
+            <!-- 10. 已上会 -->
+            <tr><td><span class="tag tag-meeting-done">已上会</span></td><td class="col-title">关于体育局办公区消防安全设施更新的议题</td><td>招投标类</td><td>场馆中心</td><td>赵强</td><td>2026-05-15</td><td>18万元</td><td>第21次局长办公会</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button><button class="btn btn-default btn-sm">导出</button></td></tr>
+            <tr><td><span class="tag tag-meeting-done">已上会</span></td><td class="col-title">关于2026年体育赛事承办经费预算调整的议题</td><td>其他类型</td><td>市场科</td><td>冯凯</td><td>2026-05-12</td><td>95万元</td><td>第21次局长办公会</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button></td></tr>
+            <!-- 11. 已归档 -->
+            <tr><td><span class="tag tag-archived">已归档</span></td><td class="col-title">关于第一体校运动员宿舍楼改造竣工的议题</td><td>启动类</td><td>第一体校</td><td>孙磊</td><td>2026-04-28</td><td>320万元</td><td>第20次局长办公会</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button><button class="btn btn-default btn-sm">导出</button></td></tr>
+            <tr><td><span class="tag tag-archived">已归档</span></td><td class="col-title">关于2026年春节前安全生产检查的议题</td><td>其他类型</td><td>局办公室</td><td>张明</td><td>2026-01-20</td><td>—</td><td>第17次局长办公会</td><td class="topic-table-actions"><button class="btn btn-default btn-sm">查看</button></td></tr>
+          </tbody>
+          </table>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Page: 数据统计 (V1.1 更新) ===== -->
+  <div class="page" id="page-stats">
+    <div class="form-container-wide">
+
+      <div id="dept-view">
+        <div class="filter-bar">
+          <input type="date" class="date-picker" value="2026-06-01">
+          <span>至</span>
+          <input type="date" class="date-picker" value="2026-06-30">
+          <button class="btn btn-primary" style="padding:6px 16px;font-size:13px">查询</button>
+        </div>
+
+        <!-- V1.1: 删除通过率，改为3卡片 -->
+        <div class="stats-cards">
+          <div class="stat-card-big"><div class="stat-big-num">18</div><div class="stat-big-label">本月提报议题</div></div>
+          <div class="stat-card-big"><div class="stat-big-num" style="color:#52c41a">12</div><div class="stat-big-label">已审议通过</div></div>
+          <div class="stat-card-big"><div class="stat-big-num" style="color:#ff4d4f">2</div><div class="stat-big-label">未通过/驳回</div></div>
+        </div>
+
+        <div class="two-col">
+          <!-- V1.1: 按议题类型分布统计 -->
+          <div class="section-card">
+            <div class="section-title">议题类型分布统计（场馆中心）</div>
+            <div class="bar-item"><span class="bar-label">启动类</span><div class="bar-outer"><div class="bar-inner" style="width:35%;background:#1677ff"></div></div><span class="bar-val">7件</span></div>
+            <div class="bar-item"><span class="bar-label">比选类</span><div class="bar-outer"><div class="bar-inner" style="width:20%;background:#52c41a"></div></div><span class="bar-val">4件</span></div>
+            <div class="bar-item"><span class="bar-label">招投标类</span><div class="bar-outer"><div class="bar-inner" style="width:25%;background:#faad14"></div></div><span class="bar-val">5件</span></div>
+            <div class="bar-item"><span class="bar-label">党建工作</span><div class="bar-outer"><div class="bar-inner" style="width:10%;background:#ff4d4f"></div></div><span class="bar-val">2件</span></div>
+            <div class="bar-item"><span class="bar-label">其他类型</span><div class="bar-outer"><div class="bar-inner" style="width:10%;background:#722ed1"></div></div><span class="bar-val">2件</span></div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-title">议题状态分布</div>
+            <div class="bar-item"><span class="bar-label">已审议</span><div class="bar-outer"><div class="bar-inner" style="width:60%;background:#52c41a"></div></div><span class="bar-val">12件</span></div>
+            <div class="bar-item"><span class="bar-label">审核中</span><div class="bar-outer"><div class="bar-inner" style="width:20%;background:#faad14"></div></div><span class="bar-val">4件</span></div>
+            <div class="bar-item"><span class="bar-label">已废止</span><div class="bar-outer"><div class="bar-inner" style="width:10%;background:#ff4d4f"></div></div><span class="bar-val">2件</span></div>
+            <div class="bar-item"><span class="bar-label">草稿</span><div class="bar-outer"><div class="bar-inner" style="width:10%;background:#d9d9d9"></div></div><span class="bar-val">2件</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <!-- ========== V1.3 局领导视角 ========== -->
+
+  <!-- ===== Page: 局领导首页 ===== -->
+  <div class="page" id="page-leader-home">
+    <div class="welcome-banner" style="background: linear-gradient(135deg, #722ed1 0%, #b37feb 100%);">
+      <div class="welcome-text">
+        <h2>👤 欢迎回来，局领导</h2>
+        <p>局长办公会 · 您有 8 条待审议题，3 条待签纪要</p>
+      </div>
+      <div class="welcome-stat">
+        <div class="num">246</div>
+        <div class="label">全局议题总数</div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">📋 待审议题 · 按局长办公会批次</div>
+      <div class="leader-batch-cards">
+        <div class="leader-batch-card" onclick="navigateLeader('pool')" style="border-left:4px solid #fa8c16">
+          <div class="lb-title">第22次局长办公会</div>
+          <div class="lb-meta"><span>2026年6月5日</span><span class="lb-count">待审 3 条</span></div>
+        </div>
+        <div class="leader-batch-card" onclick="navigateLeader('pool')">
+          <div class="lb-title">第23次局长办公会</div>
+          <div class="lb-meta"><span>2026年6月19日</span><span class="lb-count">待审 5 条</span></div>
+        </div>
+        <div class="leader-batch-card" onclick="navigateLeader('pool')">
+          <div class="lb-title">第24次局长办公会</div>
+          <div class="lb-meta"><span>2026年7月3日</span><span class="lb-count">待审 0 条</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">快捷入口</div>
+      <div class="quick-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="quick-item" onclick="navigateLeader('pool')"><div class="quick-icon">📥</div><div class="quick-text">上会议题</div></div>
+        <div class="quick-item" onclick="navigateLeader('minutes')"><div class="quick-icon">📋</div><div class="quick-text">会议纪要</div></div>
+        <div class="quick-item" onclick="navigateLeader('stats')"><div class="quick-icon">📊</div><div class="quick-text">数据统计</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Page: 局领导上会议题 ===== -->
+  <div class="page" id="page-leader-pool">
+    <div class="form-container-wide">
+      <div class="form-row" style="margin-bottom:18px">
+        <label class="form-label">选择局长办公会批次</label>
+        <select class="form-select" style="max-width:400px" id="leaderPoolBatch" onchange="onLeaderPoolBatch()">
+          <option value="22">第22次局长办公会 · 2026年6月5日（3条待审）</option>
+          <option value="23">第23次局长办公会 · 2026年6月19日（5条待审）</option>
+          <option value="24">第24次局长办公会 · 2026年7月3日（无待审）</option>
+        </select>
+      </div>
+
+      <div class="leader-split" id="leaderPoolView">
+        <!-- 左栏：议题列表 -->
+        <div class="leader-left">
+          <div class="leader-left-header" style="display:flex;justify-content:space-between;align-items:center">
+            <span>议题列表</span>
+            <button class="btn btn-sm" style="font-size:11px;padding:3px 10px;background:#f0f7ff;border:1px solid #91caff;color:#1677ff;border-radius:4px;cursor:pointer" onclick="leaderSelectAll()">全选预览</button>
+          </div>
+          <div class="leader-topic-item active" id="lt-item-0" onclick="leaderSelectTopic(0)">
+            <span class="lt-title">关于奥林匹克体育中心场馆维修改造项目启动的议题</span>
+            <span class="lt-dept">场馆中心 · 85万元</span>
+          </div>
+          <div class="leader-topic-item" id="lt-item-1" onclick="leaderSelectTopic(1)">
+            <span class="lt-title">关于2026年暑期青少年体育培训项目经费申请的议题</span>
+            <span class="lt-dept">青少科 · 32万元</span>
+          </div>
+          <div class="leader-topic-item" id="lt-item-2" onclick="leaderSelectTopic(2)">
+            <span class="lt-title">关于体育局办公区消防安全设施更新的议题</span>
+            <span class="lt-dept">场馆中心 · 18万元</span>
+          </div>
+          <div class="leader-topic-item" id="lt-item-3" onclick="leaderSelectTopic(3)">
+            <span class="lt-title">关于第一体校整体改造提升方案的议题</span>
+            <span class="lt-dept">第一体校 · 320万元</span>
+          </div>
+          <div class="leader-topic-item" id="lt-item-4" onclick="leaderSelectTopic(4)">
+            <span class="lt-title">关于2026年度体育局中层干部调整方案的议题</span>
+            <span class="lt-dept">组织人事科 · —</span>
+          </div>
+        </div>
+
+        <!-- 右栏：议题内容预览 -->
+        <div class="leader-right">
+          <div class="leader-right-header">
+            <span id="leaderPreviewTitle">议题内容预览</span>
+            <span style="font-size:12px;color:#999;font-weight:400" id="leaderPreviewHint">第22次局长办公会</span>
+          </div>
+          <div class="leader-right-body" id="leaderPreviewContent">
+            <!-- JS动态填充 -->
+          </div>
+          <!-- 批示审批栏 -->
+          <div class="leader-approve-bar" style="margin:0 16px 16px 16px">
+            <textarea id="leaderComment" placeholder="输入批示意见（选填）..."></textarea>
+            <button class="btn btn-default btn-sm" onclick="showToast('议题已下载' + (document.getElementById('leaderSelectAll').checked ? '（全部）' : ''))">📥 下载</button>
+            <button class="btn btn-success btn-sm" onclick="leaderApprove()">✅ 通过</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Page: 局领导会议纪要 ===== -->
+  <div class="page" id="page-leader-minutes">
+    <div class="form-container-wide">
+      <div class="form-row" style="margin-bottom:18px">
+        <label class="form-label">选择局长办公会批次</label>
+        <select class="form-select" style="max-width:400px" id="leaderMinBatch" onchange="onLeaderMinBatch()">
+          <option value="21">第21次局长办公会 · 2026年5月22日（已上会，待签）</option>
+          <option value="20">第20次局长办公会 · 2026年5月8日（已签发）</option>
+          <option value="19">第19次局长办公会 · 2026年4月24日（已签发）</option>
+        </select>
+      </div>
+
+      <div class="leader-split" id="leaderMinView">
+        <!-- 左栏：议题列表 -->
+        <div class="leader-left">
+          <div class="leader-left-header" style="display:flex;justify-content:space-between;align-items:center">
+            <span>议题列表</span>
+            <button class="btn btn-sm" style="font-size:11px;padding:3px 10px;background:#f0f7ff;border:1px solid #91caff;color:#1677ff;border-radius:4px;cursor:pointer" onclick="leaderMinSelectAll()">全选预览</button>
+          </div>
+          <div class="leader-topic-item active" id="lm-item-0" onclick="leaderMinSelectTopic(0)">
+            <span class="lt-title">关于奥运功能区体育设施维护方案的议题</span>
+            <span class="lt-dept">场馆中心</span>
+          </div>
+          <div class="leader-topic-item" id="lm-item-1" onclick="leaderMinSelectTopic(1)">
+            <span class="lt-title">关于2026年度群众体育赛事经费拨付的议题</span>
+            <span class="lt-dept">群体科</span>
+          </div>
+          <div class="leader-topic-item" id="lm-item-2" onclick="leaderMinSelectTopic(2)">
+            <span class="lt-title">关于区体育产业引导资金分配方案的议题</span>
+            <span class="lt-dept">产业中心</span>
+          </div>
+          <div class="leader-topic-item" id="lm-item-3" onclick="leaderMinSelectTopic(3)">
+            <span class="lt-title">关于加强青少年体育训练体系建设的议题</span>
+            <span class="lt-dept">青少科</span>
+          </div>
+        </div>
+
+        <!-- 右栏：会议纪要内容预览 -->
+        <div class="leader-right">
+          <div class="leader-right-header">
+            <span id="leaderMinPreviewTitle">会议纪要预览</span>
+            <span style="font-size:12px;color:#999;font-weight:400" id="leaderMinPreviewHint">第21次局长办公会 · 2026年5月22日</span>
+          </div>
+          <div class="leader-right-body" id="leaderMinContent">
+            <!-- JS动态填充 -->
+          </div>
+          <!-- 批示签发栏 -->
+          <div class="leader-approve-bar" style="margin:0 16px 16px 16px;background:#f6ffed;border-color:#b7eb8f">
+            <textarea id="leaderMinComment" placeholder="输入批示或修改意见（选填）..."></textarea>
+            <button class="btn btn-download btn-sm" onclick="showToast('会议纪要已下载')">📥 下载</button>
+            <button class="btn btn-success" onclick="leaderMinSign()">✍️ 签 发</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Page: 局领导数据统计 ===== -->
+  <div class="page" id="page-leader-stats">
+    <div class="form-container-wide">
+      <div class="stats-cards">
+        <div class="stat-card-big"><div class="stat-big-num">246</div><div class="stat-big-label">全局议题总数</div></div>
+        <div class="stat-card-big"><div class="stat-big-num" style="color:#52c41a">32</div><div class="stat-big-label">本月新增</div></div>
+        <div class="stat-card-big"><div class="stat-big-num" style="color:#fa8c16">12</div><div class="stat-big-label">参与部门数</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="section-card" style="box-shadow:none">
+          <div class="section-title">💰 本年度支出/收入统计（单位：万元）</div>
+          <div style="display:flex;justify-content:space-around;align-items:flex-end;height:220px;padding:0 20px;margin-top:20px">
+            <div style="text-align:center">
+              <div style="width:56px;height:140px;background:#ff4d4f;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#ff4d4f">360</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">1月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:110px;background:#ff4d4f;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#ff4d4f">280</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">2月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:160px;background:#ff4d4f;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#ff4d4f">420</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">3月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:130px;background:#ff4d4f;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#ff4d4f">340</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">4月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:180px;background:#ff4d4f;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#ff4d4f">480</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">5月</span>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-around;align-items:flex-end;height:180px;padding:0 20px;margin-top:10px;border-top:1px dashed #f0f0f0;padding-top:20px">
+            <div style="text-align:center">
+              <div style="width:56px;height:90px;background:#52c41a;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#52c41a">220</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">1月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:60px;background:#52c41a;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#52c41a">150</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">2月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:80px;background:#52c41a;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#52c41a">200</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">3月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:100px;background:#52c41a;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#52c41a">260</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">4月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:120px;background:#52c41a;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#52c41a">310</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">5月</span>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:center;gap:24px;margin-top:16px;font-size:12px">
+            <span>🔴 <b>年度支出累计：</b><span style="color:#ff4d4f;font-weight:600">1,880万元</span></span>
+            <span>🟢 <b>年度收入累计：</b><span style="color:#52c41a;font-weight:600">1,140万元</span></span>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">🏆 各部门支出排行榜</div>
+          <table class="dept-table">
+            <thead><tr><th>排名</th><th>部门</th><th>支出金额</th><th>涉及议题数</th></tr></thead>
+            <tbody>
+              <tr><td><span class="rank-badge gold">1</span></td><td>场馆中心</td><td style="color:#ff4d4f;font-weight:600">485万元</td><td>18</td></tr>
+              <tr><td><span class="rank-badge silver">2</span></td><td>第一体校</td><td style="color:#ff4d4f;font-weight:600">320万元</td><td>12</td></tr>
+              <tr><td><span class="rank-badge bronze">3</span></td><td>第二体校</td><td style="color:#ff4d4f;font-weight:600">280万元</td><td>10</td></tr>
+              <tr><td><span class="rank-badge">4</span></td><td>局办公室</td><td style="color:#ff4d4f;font-weight:600">230万元</td><td>8</td></tr>
+              <tr><td><span class="rank-badge">5</span></td><td>青少科</td><td style="color:#ff4d4f;font-weight:600">195万元</td><td>15</td></tr>
+              <tr><td><span class="rank-badge">6</span></td><td>第三体校</td><td style="color:#ff4d4f;font-weight:600">170万元</td><td>7</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-card" style="border-left:4px solid #722ed1">
+        <div class="section-title">⚡ 三重一大事项议题 <span style="font-size:12px;color:#722ed1;font-weight:400">（重点关注）</span></div>
+        <table class="topic-table">
+          <thead><tr><th>议题标题</th><th>类型</th><th>部门</th><th>金额</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td class="col-title">🔗 关于奥林匹克体育中心场馆维修改造项目启动的议题</td><td>重大工程项目</td><td>场馆中心</td><td>85万元</td><td><span class="tag tag-review">审核中</span></td></tr>
+            <tr><td class="col-title">🔗 关于第一体校整体改造提升方案的议题</td><td>重大工程项目</td><td>第一体校</td><td>320万元</td><td><span class="tag tag-converted">已审议</span></td></tr>
+            <tr><td class="col-title">🔗 关于2026年度体育局中层干部调整方案的议题</td><td>重要人事任免</td><td>组织人事科</td><td>—</td><td><span class="tag tag-pending">待审核</span></td></tr>
+            <tr><td class="col-title">🔗 关于体育产业发展专项资金分配方案的议题</td><td>大额资金使用</td><td>产业中心</td><td>500万元</td><td><span class="tag tag-archived">已归档</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+// ===== 状态 =====
+let currentRole = 'dept'; // 'dept' | 'leader'
+let currentLeaderPage = 'home';
+
+const deptPageTitles = {
+  home: '首页', write: '写议题', upload: '上传议题',
+  convert: '议题转换（场馆中心）', pool: '上会议题', minutes: '会议纪要',
+  library: '议题库', stats: '数据统计'
+};
+const leaderPageTitles = {
+  home: '首页（局领导）', pool: '上会议题', minutes: '会议纪要', stats: '数据统计'
+};
+
+// ===== 角色切换 =====
+function switchRole(role) {
+  currentRole = role;
+  // 局领导相关页面不再通过前台切换，此函数仅保留兼容
+  navigate('home');
+}
+
+// ── 侧栏用户菜单：点击切换登出按钮 ──
+function toggleSidebarUser() {
+  const logout = document.getElementById('sidebarLogout');
+  logout.style.display = logout.style.display === 'none' ? '' : 'none';
+}
+
+// ── 退出登录 ──
+async function doLogout() {
+  if (_token) {
+    try { await POST('/auth/logout'); } catch(e) {}
+  }
+  clearSession();
+  document.getElementById('sidebarLogout').style.display = 'none';
+  document.getElementById('sidebarName').textContent = '场馆中心 缪逸飞';
+  document.getElementById('sidebarRole').textContent = '场馆中心';
+  showToast('已退出登录');
+  navigate('home');
+}
+
+// ===== 统一导航（角色感知） =====
+function navigate(name) {
+  // 局领导模式下，自动路由到领导页面
+  if (currentRole === 'leader' && ['home', 'pool', 'minutes', 'stats'].includes(name)) {
+    navigateLeader(name);
+    return;
+  }
+  // 局领导模式下，点击科室专属页面（write/upload/convert/library）无效
+  if (currentRole === 'leader') return;
+
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name)?.classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('nav-' + name)?.classList.add('active');
+  document.getElementById('pageTitle').textContent = deptPageTitles[name] || '议题系统';
+}
+
+// ===== 局领导导航 =====
+function navigateLeader(name) {
+  currentLeaderPage = name;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-leader-' + name)?.classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('nav-' + name)?.classList.add('active');
+  document.getElementById('pageTitle').textContent = leaderPageTitles[name] || '议题系统';
+
+  // 初始化局领导上会议题页面的预览内容
+  if (name === 'pool') leaderInitPreview();
+  if (name === 'minutes') leaderMinInitPreview();
+}
+
+// ===== 局领导上会议题 =====
+let leaderSelectedTopic = 0;
+const leaderTopics = [
+  {
+    title: '关于奥林匹克体育中心场馆维修改造项目启动的议题',
+    dept: '场馆中心', amount: '85万元', type: '启动类',
+    bg: '奥林匹克体育中心场馆设施自2018年投入使用以来，部分设备老化严重，游泳馆恒温系统故障频发，篮球馆地面磨损超标，已影响正常训练和赛事承办。为确保场馆安全运行，拟启动维修改造项目。',
+    detail: '1. 游泳馆恒温系统整体更换\n2. 篮球馆运动地板翻新\n3. 场馆消防设施升级改造\n4. 观众看台安全护栏更换',
+    ask: '请局领导审议批准奥林匹克体育中心场馆维修改造项目启动，项目预算85万元。'
+  },
+  {
+    title: '关于2026年暑期青少年体育培训项目经费申请的议题',
+    dept: '青少科', amount: '32万元', type: '比选类',
+    bg: '为丰富青少年暑期体育生活，落实全民健身计划，拟在2026年暑期组织篮球、游泳、羽毛球等体育培训项目，预计覆盖全区500名青少年。',
+    detail: '方案A：委托第三方专业机构承办（预算32万元）\n方案B：各场馆自行组织（预算28万元）\n方案C：与学校合作开展（预算25万元）',
+    ask: '请局领导审议比选方案，确定暑期青少年体育培训项目的承办方式和经费预算。'
+  },
+  {
+    title: '关于体育局办公区消防安全设施更新的议题',
+    dept: '场馆中心', amount: '18万元', type: '招投标类',
+    bg: '体育局办公区部分消防设施已超使用年限，灭火器需更换，部分楼层烟感报警器灵敏度下降，存在安全隐患。',
+    detail: '1. 更换过期灭火器120具\n2. 更新烟感报警器60个\n3. 增设应急照明设备30套\n4. 消防管道系统检修',
+    ask: '请局领导审议批准办公区消防设施更新项目招标方案，项目预算18万元。'
+  },
+  {
+    title: '关于第一体校整体改造提升方案的议题',
+    dept: '第一体校', amount: '320万元', type: '重大工程',
+    bg: '第一体校教学楼及训练场馆建于2005年，部分结构老化，训练设施落后，已无法满足当前体育教学和训练需求。拟对教学楼、训练馆、学生宿舍进行全面改造提升。',
+    detail: '1. 教学楼加固及外立面翻新\n2. 训练馆设施全面升级\n3. 学生宿舍改造\n4. 室外运动场地翻新',
+    ask: '请局领导审议批准第一体校整体改造提升方案，项目预算320万元。'
+  },
+  {
+    title: '关于2026年度体育局中层干部调整方案的议题',
+    dept: '组织人事科', amount: '—', type: '人事任免',
+    bg: '根据区委组织部统一部署和事业单位改革要求，结合体育局工作实际需要，拟对部分中层干部岗位进行调整优化。',
+    detail: '拟调整岗位共8个，涉及场馆中心、群体科、产业中心等部门。调整方案已经局党委会研究讨论。',
+    ask: '请局领导审议批准2026年度中层干部调整方案。'
+  }
+];
+
+function leaderInitPreview() {
+  leaderSelectedTopic = 0;
+  // 高亮第一个
+  document.querySelectorAll('#page-leader-pool .leader-topic-item').forEach((el, i) => {
+    el.classList.toggle('active', i === 0);
+  });
+  renderLeaderPreview(0);
+}
+
+function leaderSelectTopic(idx) {
+  leaderSelectedTopic = idx;
+  document.querySelectorAll('#page-leader-pool .leader-topic-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+  renderLeaderPreview(idx);
+}
+
+function leaderSelectAll() {
+  // 拼接所有议题内容预览
+  let allContent = '';
+  leaderTopics.forEach((t, i) => {
+    allContent += '<div style="margin-bottom:24px;padding-bottom:16px;border-bottom:2px dashed #e8e8e8">';
+    allContent += '<div style="font-weight:600;font-size:15px;color:#1677ff;margin-bottom:8px">【议题' + (i+1) + '】' + t.title + '</div>';
+    allContent += '<div style="margin-bottom:4px"><b>部门：</b>' + t.dept + ' | <b>类型：</b>' + t.type + ' | <b>金额：</b>' + t.amount + '</div>';
+    allContent += '<div style="margin-bottom:4px"><b>背景：</b>' + t.bg + '</div>';
+    allContent += '<div style="margin-bottom:4px"><b>内容：</b><pre style="font-family:inherit;white-space:pre-wrap;margin:0;color:#555">' + t.detail + '</pre></div>';
+    allContent += '<div style="margin-bottom:0"><b>拟请事项：</b>' + t.ask + '</div>';
+    allContent += '</div>';
+  });
+  document.getElementById('leaderPreviewContent').innerHTML = allContent;
+  document.getElementById('leaderPreviewTitle').textContent = '全部议题预览（共' + leaderTopics.length + '条）';
+  document.querySelectorAll('#page-leader-pool .leader-topic-item').forEach(el => el.classList.remove('active'));
+}
+
+function renderLeaderPreview(idx) {
+  const t = leaderTopics[idx];
+  const html = '<div style="font-weight:600;font-size:16px;color:#1677ff;margin-bottom:14px">' + t.title + '</div>'
+    + '<div style="display:flex;gap:20px;margin-bottom:10px"><span><b>提报部门：</b>' + t.dept + '</span><span><b>议题类型：</b>' + t.type + '</span><span><b>涉及金额：</b>' + t.amount + '</span></div>'
+    + '<hr style="border:none;border-top:1px dashed #e0e0e0;margin:12px 0">'
+    + '<div style="margin-bottom:8px"><b>议题背景：</b></div><p style="color:#555;margin-bottom:14px">' + t.bg + '</p>'
+    + '<div style="margin-bottom:8px"><b>主要内容：</b></div><pre style="font-family:inherit;white-space:pre-wrap;margin:0;color:#555;margin-bottom:14px">' + t.detail + '</pre>'
+    + '<div style="margin-bottom:4px"><b>拟请事项：</b></div><p style="color:#333">' + t.ask + '</p>';
+  document.getElementById('leaderPreviewContent').innerHTML = html;
+  document.getElementById('leaderPreviewTitle').textContent = '议题内容预览';
+  document.getElementById('leaderPreviewHint').textContent = '第22次局长办公会';
+}
+
+function onLeaderPoolBatch() {
+  showToast('已切换批次（演示）');
+  leaderInitPreview();
+}
+
+function leaderApprove() {
+  const comment = document.getElementById('leaderComment').value;
+  const topicTitle = leaderTopics[leaderSelectedTopic].title;
+  const msg = comment ? '已通过并附批示意见' : '已通过';
+  showToast('✅ ' + topicTitle.substring(0, 20) + '... ' + msg);
+  document.getElementById('leaderComment').value = '';
+}
+
+// ===== 局领导会议纪要 =====
+let leaderMinSelected = 0;
+const leaderMinutes = [
+  {
+    title: '关于奥运功能区体育设施维护方案的议题',
+    dept: '场馆中心',
+    summary: '经审议，原则同意奥运功能区体育设施维护方案。项目预算120万元，分两期实施：第一期对鸟巢周边室外运动器材进行全面检修和更换，第二期对水立方游泳设施进行维护升级。',
+    decision: '批准。请场馆中心牵头，2026年7月底前完成第一期工程。',
+    status: '待签发'
+  },
+  {
+    title: '关于2026年度群众体育赛事经费拨付的议题',
+    dept: '群体科',
+    summary: '经审议，同意2026年度群众体育赛事经费拨付方案。全年计划组织群众体育赛事12项，涉及马拉松、广场舞、太极拳、乒乓球、羽毛球等项目，总预算200万元。',
+    decision: '批准。请群体科按月编制赛事执行方案，确保经费合理使用。',
+    status: '待签发'
+  },
+  {
+    title: '关于区体育产业引导资金分配方案的议题',
+    dept: '产业中心',
+    summary: '经审议，原则同意产业引导资金分配方案。2026年度安排专项资金500万元，用于扶持区内体育科技企业、体育培训机构和赛事运营公司发展。',
+    decision: '批准。请产业中心建立资金使用跟踪评估机制，每季度汇报使用情况。',
+    status: '待签发'
+  },
+  {
+    title: '关于加强青少年体育训练体系建设的议题',
+    dept: '青少科',
+    summary: '经审议，同意加强青少年体育训练体系建设方案。建立"区体校—学校—社会俱乐部"三级训练网络，实施"朝阳之星"青少年体育人才培养计划。',
+    decision: '批准。请青少科统筹协调，2026年9月前完成三级训练网络搭建。',
+    status: '待签发'
+  }
+];
+
+function leaderMinInitPreview() {
+  leaderMinSelected = 0;
+  document.querySelectorAll('#page-leader-minutes .leader-topic-item').forEach((el, i) => {
+    el.classList.toggle('active', i === 0);
+  });
+  renderLeaderMinPreview(0);
+}
+
+function leaderMinSelectTopic(idx) {
+  leaderMinSelected = idx;
+  document.querySelectorAll('#page-leader-minutes .leader-topic-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+  renderLeaderMinPreview(idx);
+}
+
+function leaderMinSelectAll() {
+  let allContent = '';
+  leaderMinutes.forEach((m, i) => {
+    allContent += '<div style="margin-bottom:24px;padding-bottom:16px;border-bottom:2px dashed #e8e8e8">';
+    allContent += '<div style="font-weight:600;font-size:15px;color:#1677ff;margin-bottom:8px">【议题' + (i+1) + '】' + m.title + '</div>';
+    allContent += '<div style="margin-bottom:4px"><b>提报部门：</b>' + m.dept + '</div>';
+    allContent += '<div style="margin-bottom:4px"><b>会议纪要：</b>' + m.summary + '</div>';
+    allContent += '<div style="margin-bottom:0"><b>会议决定：</b><span style="color:#52c41a;font-weight:500">' + m.decision + '</span></div>';
+    allContent += '</div>';
+  });
+  document.getElementById('leaderMinContent').innerHTML = allContent;
+  document.getElementById('leaderMinPreviewTitle').textContent = '全部会议纪要预览（共' + leaderMinutes.length + '条）';
+  document.querySelectorAll('#page-leader-minutes .leader-topic-item').forEach(el => el.classList.remove('active'));
+}
+
+function renderLeaderMinPreview(idx) {
+  const m = leaderMinutes[idx];
+  const html = '<div style="font-weight:600;font-size:16px;color:#1677ff;margin-bottom:14px">' + m.title + '</div>'
+    + '<div style="margin-bottom:10px"><b>提报部门：</b>' + m.dept + ' | <b>状态：</b><span class="tag tag-pending">' + m.status + '</span></div>'
+    + '<hr style="border:none;border-top:1px dashed #e0e0e0;margin:12px 0">'
+    + '<div style="margin-bottom:8px"><b>📋 会议纪要：</b></div><p style="color:#555;margin-bottom:14px;line-height:2">' + m.summary + '</p>'
+    + '<div style="margin-bottom:4px"><b>✅ 会议决定：</b></div><p style="color:#52c41a;font-weight:500;line-height:2">' + m.decision + '</p>';
+  document.getElementById('leaderMinContent').innerHTML = html;
+  document.getElementById('leaderMinPreviewTitle').textContent = '会议纪要预览';
+  document.getElementById('leaderMinPreviewHint').textContent = '第21次局长办公会 · 2026年5月22日';
+}
+
+function onLeaderMinBatch() {
+  showToast('已切换批次（演示）');
+  leaderMinInitPreview();
+}
+
+function leaderMinSign() {
+  const comment = document.getElementById('leaderMinComment').value;
+  const title = leaderMinutes[leaderMinSelected].title;
+  const msg = comment ? '已签发并附修改意见' : '已签发';
+  showToast('✍️ ' + title.substring(0, 20) + '... ' + msg);
+  document.getElementById('leaderMinComment').value = '';
+}
+
+function switchStatsView(el, view) {
+  el.parentElement.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('dept-view').style.display = view === 'dept' ? '' : 'none';
+  document.getElementById('leader-view').style.display = view === 'leader' ? '' : 'none';
+}
+
+function setFilter(el) {
+  el.parentElement.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  // 自动触发筛选
+  if (typeof libFilter === 'function') libFilter();
+}
+
+function updateWordCount(el, targetId) {
+  document.getElementById(targetId).textContent = el.value.length;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none' }, 2000);
+}
+
+// ===== 实时日期显示 =====
+function updateRealtimeDate() {
+  const now = new Date();
+  const weekdays = ['日','一','二','三','四','五','六'];
+  const str = now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日 星期' + weekdays[now.getDay()];
+  const el = document.getElementById('realtimeDate');
+  if (el) el.textContent = str;
+}
+setInterval(updateRealtimeDate, 1000);
+updateRealtimeDate();
+
+// ===== 议题库筛选跳转 =====
+function setLibFilter(type) {
+  const filterRow = document.querySelector('#page-library .filter-row');
+  const sel = document.getElementById('libStatusSelect');
+  if (!sel) return;
+  if (type === 'pending') {
+    sel.value = '已审核';
+  } else if (type === 'review') {
+    sel.value = '部门领导审核中';
+  }
+}
+
+// ===== 议题库 - 会议批次切换 =====
+function setLibBatch(el, batch) {
+  // 下拉框模式：el 是 select 元素，batch 是 select.value
+  libFilter();
+}
+
+// ===== 议题库 - 综合筛选 =====
+function libFilter() {
+  // 前端演示筛选逻辑（静态示例表格）+ 数据库刷新
+  if (_token) { refreshAgendaList(); }
+  // 同时筛选静态示例
+  const filterText = (document.getElementById('libSearchInput')?.value || '').toLowerCase();
+  const statusFilter = (document.getElementById('libStatusSelect')?.value || '');
+  const detailsEl = document.querySelector('#page-library details');
+  if (!detailsEl) return;
+  const rows = detailsEl.querySelectorAll('tbody tr');
+  let visibleCount = 0;
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const statusCell = row.querySelector('.tag')?.textContent || '';
+    const textMatch = !filterText || text.includes(filterText);
+    const statusMatch = !statusFilter || statusCell.includes(statusFilter);
+    const match = textMatch && statusMatch;
+    row.style.display = match ? '' : 'none';
+    if (match) visibleCount++;
+  });
+  const totalEl = document.getElementById('agendaTotalCount');
+  if (totalEl && !_token) totalEl.textContent = visibleCount;
+}
+
+// ===== 写议题 - 模板选择 =====
+function selTemplate(el, type) {
+  document.querySelectorAll('#templateSelector .template-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ===== 写议题 - 提交后显示下载 =====
+function onTopicSubmit() {
+  showToast('议题已提交，待审核！');
+  document.getElementById('submitDownloadBox').style.display = 'flex';
+}
+
+// ===== 上传 (V1.2 重写) - 多议题拆分预览 =====
+function onUploadFileV2() {
+  document.getElementById('uploadIcon2').textContent = '✅';
+  document.getElementById('uploadStatus2').textContent = '文件已选择: 场馆中心议题汇总.docx（含3个议题）';
+  document.getElementById('uploadSplitView').style.display = 'block';
+}
+
+let selectedSplitIdx = 0;
+function selectSplitTopic(el, idx) {
+  selectedSplitIdx = idx;
+  document.querySelectorAll('#uploadSplitView .batch-item').forEach(item => item.style.background = '');
+  document.querySelectorAll('#uploadSplitView .batch-item').forEach(item => item.style.fontWeight = '');
+  el.style.background = '#f0f7ff';
+  
+  const contents = [
+    '<div style="font-weight:600;font-size:15px;margin-bottom:12px;color:#1677ff">关于奥林匹克体育中心场馆维修改造项目启动的议题</div><div style="margin-bottom:8px"><b>提报部门：</b>场馆中心</div><div style="margin-bottom:8px"><b>议题类型：</b>启动类</div><div style="margin-bottom:8px"><b>涉及金额：</b>85万元</div><hr style="border:none;border-top:1px dashed #e0e0e0;margin:12px 0"><div style="margin-bottom:8px"><b>议题背景：</b></div><p style="color:#666;margin-bottom:12px">奥林匹克体育中心场馆设施自2018年投入使用以来，部分设备老化严重，游泳馆恒温系统故障频发，篮球馆地面磨损超标，已影响正常训练和赛事承办。为确保场馆安全运行，拟启动维修改造项目。</p><div style="margin-bottom:8px"><b>主要建设内容：</b></div><p style="color:#666;margin-bottom:4px">1. 游泳馆恒温系统整体更换</p><p style="color:#666;margin-bottom:4px">2. 篮球馆运动地板翻新</p><p style="color:#666;margin-bottom:4px">3. 场馆消防设施升级改造</p><p style="color:#666;margin-bottom:12px">4. 观众看台安全护栏更换</p><div style="margin-bottom:4px"><b>拟请事项：</b></div><p style="color:#666">请局领导审议批准奥林匹克体育中心场馆维修改造项目启动，项目预算85万元。</p><div class="info-panel" style="margin-top:16px"><p style="font-size:12px;color:#52c41a">✅ 系统已自动修正：标题格式化、部门匹配、金额格式统一</p><p style="font-size:12px;color:#fa8c16;margin-top:4px">⚠️ 请在确认前仔细核对议题内容，如有误可手动编辑</p></div>',
+    '<div style="font-weight:600;font-size:15px;margin-bottom:12px;color:#1677ff">关于2026年暑期青少年体育培训项目经费申请的议题</div><div style="margin-bottom:8px"><b>提报部门：</b>青少科</div><div style="margin-bottom:8px"><b>议题类型：</b>比选类</div><div style="margin-bottom:8px"><b>涉及金额：</b>32万元</div><hr style="border:none;border-top:1px dashed #e0e0e0;margin:12px 0"><div style="margin-bottom:8px"><b>议题背景：</b></div><p style="color:#666;margin-bottom:12px">为丰富青少年暑期体育生活，落实全民健身计划，拟在2026年暑期组织篮球、游泳、羽毛球等体育培训项目，预计覆盖全区500名青少年。</p><div style="margin-bottom:8px"><b>比选方案：</b></div><p style="color:#666;margin-bottom:4px">方案A：委托第三方专业机构承办（预算32万元）</p><p style="color:#666;margin-bottom:4px">方案B：各场馆自行组织（预算28万元）</p><p style="color:#666;margin-bottom:12px">方案C：与学校合作开展（预算25万元）</p><div style="margin-bottom:4px"><b>拟请事项：</b></div><p style="color:#666">请局领导审议比选方案，确定暑期青少年体育培训项目的承办方式和经费预算。</p><div class="info-panel" style="margin-top:16px"><p style="font-size:12px;color:#52c41a">✅ 系统已自动修正：标题格式化、部门匹配、金额格式统一</p><p style="font-size:12px;color:#fa8c16;margin-top:4px">⚠️ 请在确认前仔细核对议题内容，如有误可手动编辑</p></div>',
+    '<div style="font-weight:600;font-size:15px;margin-bottom:12px;color:#1677ff">关于体育局办公区消防安全设施更新的议题</div><div style="margin-bottom:8px"><b>提报部门：</b>场馆中心</div><div style="margin-bottom:8px"><b>议题类型：</b>招投标类</div><div style="margin-bottom:8px"><b>涉及金额：</b>18万元</div><hr style="border:none;border-top:1px dashed #e0e0e0;margin:12px 0"><div style="margin-bottom:8px"><b>议题背景：</b></div><p style="color:#666;margin-bottom:12px">体育局办公区部分消防设施已超使用年限，灭火器需更换，部分楼层烟感报警器灵敏度下降，存在安全隐患。</p><div style="margin-bottom:8px"><b>招标内容：</b></div><p style="color:#666;margin-bottom:4px">1. 更换过期灭火器120具</p><p style="color:#666;margin-bottom:4px">2. 更新烟感报警器60个</p><p style="color:#666;margin-bottom:4px">3. 增设应急照明设备30套</p><p style="color:#666;margin-bottom:12px">4. 消防管道系统检修</p><div style="margin-bottom:4px"><b>拟请事项：</b></div><p style="color:#666">请局领导审议批准办公区消防设施更新项目招标方案，项目预算18万元。</p><div class="info-panel" style="margin-top:16px"><p style="font-size:12px;color:#52c41a">✅ 系统已自动修正：标题格式化、部门匹配、金额格式统一</p><p style="font-size:12px;color:#fa8c16;margin-top:4px">⚠️ 请在确认前仔细核对议题内容，如有误可手动编辑</p></div>'
+  ];
+  document.getElementById('splitPreviewContent').innerHTML = contents[idx];
+}
+
+function resetUpload() {
+  document.getElementById('uploadSplitView').style.display = 'none';
+  document.getElementById('uploadIcon2').textContent = '📁';
+  document.getElementById('uploadStatus2').textContent = '点击选择议题文件（支持Word/WPS）';
+  document.getElementById('uploadSplitSuccess').style.display = 'none';
+}
+
+function onUploadSubmit() {
+  document.getElementById('uploadSplitSuccess').style.display = 'flex';
+  document.getElementById('uploadSplitMsg').textContent = '全部 3 条议题已提交审核！';
+  showToast('3条议题已提交审核');
+}
+
+// ===== 议题转换 - 计数 =====
+function convCount() {
+  let count = 0;
+  for (let i = 1; i <= 3; i++) {
+    if (document.getElementById('conv' + i)?.checked) count++;
+  }
+  document.getElementById('convSelected').textContent = count;
+}
+
+function onConvert() {
+  let count = 0;
+  for (let i = 1; i <= 3; i++) {
+    if (document.getElementById('conv' + i)?.checked) count++;
+  }
+  if (count === 0) { showToast('请至少选择一条议题'); return; }
+  document.getElementById('convertResultText').textContent = '转换已完成：' + count + ' 条主任办公会议题 → 局长办公会议题';
+  document.getElementById('convertResult').style.display = 'flex';
+}
+
+// ===== 会议纪要 - 暂存 & 提交 =====
+function selMinTemplate(el, type) {
+  el.parentElement.querySelectorAll('.template-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function onPoolBatchSelect() {
+  const sel = document.getElementById('poolBatchSelect');
+  document.getElementById('poolTopicList').style.display = sel.value ? '' : 'none';
+}
+
+function onMinutesDraft() {
+  showToast('会议纪要已暂存（草稿）');
+}
+
+function onMinutesSubmit() {
+  if (confirm('确认提交会议纪要？提交后将进入审批流程。')) {
+    showToast('会议纪要已提交！');
+    document.getElementById('minutesSavedBox').style.display = 'flex';
+    document.getElementById('minutesSavedBox').querySelector('.sm-text').textContent = '会议纪要已提交审批！已关联议题';
+  }
+}
+
+// ===== 上传议题 - 编辑模式 =====
+let _editMode = false;
+let _currentSplitIdx = 0;
+
+const splitTopics = [
+  {
+    title:'关于奥林匹克体育中心场馆维修改造项目启动的议题',
+    dept:'场馆中心', type:'启动类', amount:85,
+    bg:'奥林匹克体育中心场馆设施自2018年投入使用以来，部分设备老化严重，游泳馆恒温系统故障频发，篮球馆地面磨损超标，已影响正常训练和赛事承办。为确保场馆安全运行，拟启动维修改造项目。',
+    detail:'1. 游泳馆恒温系统整体更换\n2. 篮球馆运动地板翻新\n3. 场馆消防设施升级改造\n4. 观众看台安全护栏更换',
+    ask:'请局领导审议批准奥林匹克体育中心场馆维修改造项目启动，项目预算85万元。',
+    meeting:''
+  },
+  {
+    title:'关于2026年暑期青少年体育培训项目经费申请的议题',
+    dept:'青少科', type:'比选类', amount:32,
+    bg:'为丰富青少年暑期体育生活，落实全民健身计划，拟在2026年暑期组织篮球、游泳、羽毛球等体育培训项目，预计覆盖全区500名青少年。',
+    detail:'方案A：委托第三方专业机构承办（预算32万元）\n方案B：各场馆自行组织（预算28万元）\n方案C：与学校合作开展（预算25万元）',
+    ask:'请局领导审议比选方案，确定暑期青少年体育培训项目的承办方式和经费预算。',
+    meeting:''
+  },
+  {
+    title:'关于体育局办公区消防安全设施更新的议题',
+    dept:'场馆中心', type:'招投标类', amount:18,
+    bg:'体育局办公区消防设施已使用超过10年，存在烟感失灵、灭火器过期等安全隐患，需进行整体更新。',
+    detail:'1. 更换全部烟感探测器\n2. 更新消防控制主机\n3. 补充灭火器材\n4. 消防通道标识更新',
+    ask:'请局领导审议批准体育局办公区消防安全设施更新项目，预算18万元。',
+    meeting:''
+  }
+];
+
+function selectSplitTopic(el, idx) {
+  document.querySelectorAll('#uploadSplitView .batch-item').forEach(i => i.style.background = '');
+  el.style.background = '#f0f7ff';
+  _currentSplitIdx = idx;
+  const t = splitTopics[idx];
+  document.getElementById('editSplitTitle').value = t.title;
+  document.getElementById('editSplitDept').value = t.dept;
+  document.getElementById('editSplitType').value = t.type;
+  document.getElementById('editSplitAmount').value = t.amount;
+  document.getElementById('editSplitBg').value = t.bg;
+  document.getElementById('editSplitDetail').value = t.detail;
+  document.getElementById('editSplitAsk').value = t.ask;
+  if (t.meeting) document.getElementById('editSplitMeeting').value = t.meeting;
+}
+
+function editSplitTopic(idx) {
+  _currentSplitIdx = idx;
+  selectSplitTopic(document.getElementById('split-item-' + idx), idx);
+  enableEditMode();
+}
+
+function toggleEditMode() {
+  if (_editMode) { disableEditMode(); } else { enableEditMode(); }
+}
+
+function enableEditMode() {
+  _editMode = true;
+  ['editSplitTitle','editSplitDept','editSplitType','editSplitAmount','editSplitMeeting','editSplitBg','editSplitDetail','editSplitAsk'].forEach(id => {
+    const el = document.getElementById(id); if (el) { el.removeAttribute('readonly'); el.removeAttribute('disabled'); }
+  });
+  const btn = document.getElementById('toggleEditBtn');
+  if (btn) { btn.textContent = '💾 保存'; btn.onclick = saveEditMode; }
+}
+
+function disableEditMode() {
+  _editMode = false;
+  ['editSplitTitle','editSplitDept','editSplitBg','editSplitDetail','editSplitAsk'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.setAttribute('readonly', '');
+  });
+  ['editSplitType','editSplitMeeting'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.setAttribute('disabled', '');
+  });
+  const elAmt = document.getElementById('editSplitAmount'); if (elAmt) elAmt.setAttribute('readonly', '');
+  const btn = document.getElementById('toggleEditBtn');
+  if (btn) { btn.textContent = '✏️ 编辑模式'; btn.onclick = toggleEditMode; }
+}
+
+function saveEditMode() {
+  const t = splitTopics[_currentSplitIdx];
+  t.title = document.getElementById('editSplitTitle').value;
+  t.dept  = document.getElementById('editSplitDept').value;
+  t.type  = document.getElementById('editSplitType').value;
+  t.amount = parseFloat(document.getElementById('editSplitAmount').value) || 0;
+  t.meeting = document.getElementById('editSplitMeeting').value;
+  t.bg    = document.getElementById('editSplitBg').value;
+  t.detail = document.getElementById('editSplitDetail').value;
+  t.ask   = document.getElementById('editSplitAsk').value;
+  
+  // 更新左侧列表显示
+  const item = document.getElementById('split-item-' + _currentSplitIdx);
+  if (item) {
+    item.querySelector('.tag').textContent = '已编辑';
+    item.querySelector('.tag').className = 'tag tag-reviewed';
+  }
+  disableEditMode();
+  showToast('议题 ' + (_currentSplitIdx+1) + ' 已保存编辑');
+}
+
+// ===== 议题库 - 废止 ====="
+function onAbolish(btn) {
+  if (confirm('确认废止该议题？废止后不可恢复。')) {
+    const row = btn.closest('tr');
+    const statusCell = row.querySelector('.tag');
+    statusCell.className = 'tag tag-abandoned';
+    statusCell.textContent = '已废止';
+    btn.style.display = 'none';
+    showToast('该议题已废止');
+  }
+}
+
+// ===== 议题池 - 期次切换 & 数据加载 =====
+const poolData = {
+  '2026-06-05': [  // 第22次
+    {title:'关于奥林匹克体育中心场馆维修改造项目启动的议题',dept:'场馆中心',type:'启动类',urgency:'紧急',amount:85,date:'2026-05-28'},
+    {title:'关于2026年暑期青少年体育培训项目经费申请的议题',dept:'青少科',type:'比选类',urgency:'普通',amount:32,date:'2026-05-30'},
+    {title:'关于体育局信息化系统升级改造的议题',dept:'局办公室',type:'招投标类',urgency:'普通',amount:120,date:'2026-05-25'},
+    {title:'关于第一体校训练场地修缮的议题',dept:'第一体校',type:'启动类',urgency:'缓办',amount:55,date:'2026-05-22'},
+    {title:'关于全民健身活动组织经费的议题',dept:'群体科',type:'其他类型',urgency:'普通',amount:38,date:'2026-05-20'}
+  ],
+  '2026-06-19': [  // 第23次
+    {title:'关于更新体育局官方网站及APP的议题',dept:'局办公室',type:'招投标类',urgency:'紧急',amount:45,date:'2026-06-10'},
+    {title:'关于第二体校田径场塑胶跑道更换的议题',dept:'第二体校',type:'启动类',urgency:'普通',amount:200,date:'2026-06-08'},
+    {title:'关于体育公园智能化改造方案的议题',dept:'体产中心',type:'招投标类',urgency:'普通',amount:300,date:'2026-06-05'}
+  ],
+  '2026-07-03': [  // 第24次
+    {title:'关于体育局2026年度人才引进计划的议题',dept:'组织人事科',type:'人事任命类',urgency:'普通',amount:0,date:'2026-06-20'},
+    {title:'关于全民健身设施巡检维护外包方案的议题',dept:'群体科',type:'比选类',urgency:'缓办',amount:28,date:'2026-06-18'}
+  ]
+};
+let _currentPoolPeriod = '2026-06-05';
+
+function selectPoolPeriod(el, period) {
+  el.parentElement.querySelectorAll('.pool-period-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  _currentPoolPeriod = period;
+  renderPoolTable();
+}
+
+function poolFilter() { renderPoolTable(); }
+
+function poolSortByAmount() {
+  // 金额排序已集成到每列表头点击，此函数保留兼容
+  renderPoolTable();
+}
+
+function poolToggleAll(cb) {
+  document.querySelectorAll('#poolTableBody .batch-checkbox').forEach(c => c.checked = cb.checked);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  拖拽排序
+// ═══════════════════════════════════════════════════════════════
+let _dragIndex = -1;
+
+function poolDragStart(e) {
+  _dragIndex = parseInt(e.currentTarget.dataset.index);
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', '');
+}
+
+function poolDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.pool-row').forEach(r => {
+    r.classList.remove('drop-above', 'drop-below');
+  });
+}
+
+function poolDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const row = e.currentTarget;
+  const index = parseInt(row.dataset.index);
+  if (index === _dragIndex) return;
+  document.querySelectorAll('.pool-row').forEach(r => r.classList.remove('drop-above', 'drop-below'));
+  const rect = row.getBoundingClientRect();
+  const mid = rect.top + rect.height / 2;
+  if (e.clientY < mid) { row.classList.add('drop-above'); }
+  else { row.classList.add('drop-below'); }
+}
+
+function poolDragLeave(e) {
+  e.currentTarget.classList.remove('drop-above', 'drop-below');
+}
+
+function poolDrop(e) {
+  e.preventDefault();
+  const targetRow = e.currentTarget;
+  const targetIndex = parseInt(targetRow.dataset.index);
+  if (targetIndex === _dragIndex) return;
+  const rect = targetRow.getBoundingClientRect();
+  const mid = rect.top + rect.height / 2;
+  const insertBefore = e.clientY < mid;
+  const data = poolData[_currentPoolPeriod];
+  const [item] = data.splice(_dragIndex, 1);
+  const insertAt = insertBefore ? targetIndex : targetIndex + 1;
+  data.splice(_dragIndex < insertAt ? insertAt - 1 : insertAt, 0, item);
+  document.querySelectorAll('.pool-row').forEach(r => r.classList.remove('drop-above', 'drop-below', 'dragging'));
+  renderPoolTable();
+}
+
+function renderPoolTable() {
+  const tbody = document.getElementById('poolTableBody');
+  if (!tbody) return;
+  
+  // 读取筛选值
+  const searchText = (document.getElementById('poolSearchInput')?.value || '').toLowerCase();
+  const deptFilter  = document.getElementById('poolDeptFilter')?.value || '';
+  const typeFilter  = document.getElementById('poolTypeFilter')?.value || '';
+  const urgFilter   = document.getElementById('poolUrgencyFilter')?.value || '';
+  
+  let data = (poolData[_currentPoolPeriod] || []).slice();
+  
+  // 搜索 + 下拉筛选过滤
+  if (searchText) {
+    data = data.filter(d => d.title.toLowerCase().includes(searchText));
+  }
+  if (deptFilter) data = data.filter(d => d.dept === deptFilter);
+  if (typeFilter) data = data.filter(d => d.type === typeFilter);
+  if (urgFilter)  data = data.filter(d => d.urgency === urgFilter);
+  
+  const urgencyMap = {紧急:'emergency-urgent',普通:'emergency-normal',缓办:'emergency-low'};
+  const batchOptions = ['2026-06-05','2026-06-19','2026-07-03'];
+  const batchLabels = { '2026-06-05': '第22次局长办公会', '2026-06-19': '第23次局长办公会', '2026-07-03': '第24次局长办公会' };
+  
+  tbody.innerHTML = data.length === 0 
+    ? '<tr><td colspan="9" style="text-align:center;padding:40px;color:#bbb">该期次暂无符合条件的议题</td></tr>'
+    : data.map((d, i) => `
+    <tr class="pool-row" draggable="true" data-index="${i}"
+        ondragstart="poolDragStart(event)" ondragend="poolDragEnd(event)"
+        ondragover="poolDragOver(event)" ondragleave="poolDragLeave(event)"
+        ondrop="poolDrop(event)">
+      <td><span class="drag-handle" title="拖动排序">⋮⋮</span><input type="checkbox" class="batch-checkbox"></td>
+      <td class="col-title">${d.title}</td>
+      <td>${d.dept}</td>
+      <td>${d.type}</td>
+      <td><span class="emergency-badge ${urgencyMap[d.urgency]||''}">${d.urgency}</span></td>
+      <td>${d.amount > 0 ? d.amount+'万元' : '—'}</td>
+      <td>${d.date}</td>
+      <td>
+        <select class="form-select" style="width:150px;padding:3px 6px;font-size:12px" onchange="movePoolTopic('${d.title.replace(/'/g,"\\'")}', this.value)">
+          <option value="">— 当前归属 —</option>
+          ${batchOptions.map(b => `<option value="${b}" ${b===_currentPoolPeriod?'selected':''}>${batchLabels[b]}</option>`).join('')}
+        </select>
+      </td>
+      <td class="topic-table-actions"><button class="btn btn-primary btn-sm" onclick="editPoolTopic('${d.title.replace(/'/g,"\\'")}')">编辑</button></td>
+    </tr>`).join('');
+}
+
+function movePoolTopic(title, targetPeriod) {
+  if (!targetPeriod) return;
+  showToast('已将「' + title.substring(0,15) + '...」调整至 ' + (targetPeriod==='2026-06-05'?'第22次':targetPeriod==='2026-06-19'?'第23次':'第24次') + '局长办公会');
+}
+
+function editPoolTopic(title) {
+  showToast('正在打开议题编辑: ' + title.substring(0,20) + '...');
+}
+
+// 初始加载
+setTimeout(() => renderPoolTable(), 100);
+
+// ═══════════════════════════════════════════════════════════════
+//  后端 API 集成层  ·  对接 http://localhost:5001
+// ═══════════════════════════════════════════════════════════════
+const API = 'http://localhost:5001/api';
+let _token = localStorage.getItem('agenda_token') || '';
+let _user  = null;
+
+// ── 清除登录状态 ──
+function clearSession() {
+  _token = '';
+  _user  = null;
+  localStorage.removeItem('agenda_token');
+  localStorage.removeItem('agenda_user');
+}
+
+async function apiCall(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'X-Token': _token }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const r = await fetch(API + path, opts);
+    const d = await r.json();
+    if (d.code !== 0) {
+      // 401 未登录/过期 → 自动清理并弹登录
+      if (r.status === 401) {
+        clearSession();
+        showLoginModal();
+        showToast(d.msg || '未登录或登录已过期，请重新登录');
+      }
+      throw new Error(d.msg || '请求失败');
+    }
+    return d.data;
+  } catch(e) {
+    if (e.message === 'Failed to fetch' || e.name === 'TypeError') {
+      throw new Error('后端服务未启动，请先启动 Flask 服务（端口 5001）');
+    }
+    console.error('[API]', method, path, e.message);
+    throw e;
+  }
+}
+const GET  = (p)    => apiCall('GET',    p);
+const POST = (p, b) => apiCall('POST',   p, b);
+const PUT  = (p, b) => apiCall('PUT',    p, b);
+const DEL  = (p)    => apiCall('DELETE', p);
+
+// ── 登录 ──
+async function doLogin(username, password) {
+  const data = await POST('/auth/login', { username, password });
+  _token = data.token;
+  _user  = data;
+  localStorage.setItem('agenda_token', _token);
+  localStorage.setItem('agenda_user',  JSON.stringify(data));
+  return data;
+}
+
+// ── 页面加载时验证 token ──
+(async function restoreSession() {
+  if (!_token) return; // 没有 token，跳过
+  try {
+    const r = await fetch(API + '/auth/check', {
+      headers: { 'X-Token': _token }
+    });
+    const d = await r.json();
+    if (d.code === 0 && d.data && d.data.valid) {
+      _user = d.data.user;
+      localStorage.setItem('agenda_user', JSON.stringify(_user));
+    } else {
+      // token 无效，清理
+      clearSession();
+    }
+  } catch(e) {
+    // 网络错误或其他问题，暂时保留 token 不清除
+    // 恢复本地缓存的用户信息作为备用
+    const saved = localStorage.getItem('agenda_user');
+    if (saved) {
+      try { _user = JSON.parse(saved); } catch(e2) {}
+    }
+  }
+})();
+
+// ── 议题列表刷新 ──
+async function refreshAgendaList() {
+  try {
+    const res = await GET('/agendas?size=50');
+    const tbody = document.getElementById('agendaListTbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    const statusLabel = {
+      draft:'草稿', submitted:'提交版', dept_review:'部门领导审核中',
+      office_review:'局办领导审核中', reviewed:'已审核',
+      scheduled:'上会排期', sched_dept_review:'排期议题局办领导初审',
+      sched_leader_review:'排期议题局领导审核', sched_reviewed:'排期议题已审核',
+      meeting_done:'已上会', archived:'已归档',
+      rejected:'已驳回', abandoned:'已废止', converted:'已转换'
+    };
+    const statusTag = {
+      draft:'tag-draft', submitted:'tag-submitted', dept_review:'tag-dept-review',
+      office_review:'tag-office-review', reviewed:'tag-reviewed',
+      scheduled:'tag-scheduled', sched_dept_review:'tag-sched-dept-review',
+      sched_leader_review:'tag-sched-leader-review', sched_reviewed:'tag-sched-reviewed',
+      meeting_done:'tag-meeting-done', archived:'tag-archived',
+      rejected:'tag-rejected', abandoned:'tag-abandoned', converted:'tag-converted'
+    };
+    (res.list || []).forEach(a => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="checkbox" style="cursor:pointer"></td>
+        <td style="color:#1677ff;font-weight:500">${a.serial_no || '-'}</td>
+        <td class="col-title" title="${a.title}" onclick="showAgendaDetail(${a.id})" style="cursor:pointer;color:#1677ff">${a.title}</td>
+        <td>${a.dept || '-'}</td>
+        <td><span class="tag ${statusTag[a.status]||'tag-draft'}">${statusLabel[a.status]||a.status}</span></td>
+        <td>${a.amount > 0 ? a.amount+'万元' : '-'}</td>
+        <td>${a.creator_name||'-'}</td>
+        <td>${(a.created_at||'').slice(0,10)}</td>
+        <td>
+          <div class="topic-table-actions">
+            <button class="btn btn-sm btn-default" onclick="showAgendaDetail(${a.id})">查看</button>
+            ${a.status==='draft'?`<button class="btn btn-sm btn-primary" onclick="submitAgenda(${a.id})">提交</button>`:''}
+            ${a.status==='draft'?`<button class="btn btn-sm btn-danger" onclick="deleteAgenda(${a.id})">删除</button>`:''}
+          </div>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+    // 更新计数
+    const el = document.getElementById('agendaTotalCount');
+    if (el) el.textContent = res.total || 0;
+  } catch(e) {
+    showToast('加载议题列表失败: ' + e.message);
+  }
+}
+
+// ── 显示议题详情 ──
+let _detailPanel = null;
+async function showAgendaDetail(id) {
+  try {
+    const a = await GET('/agendas/' + id);
+    // 创建或复用浮层
+    let panel = document.getElementById('agendaDetailPanel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'agendaDetailPanel';
+      panel.style.cssText = `position:fixed;top:0;right:0;width:520px;height:100vh;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,0.12);z-index:9999;overflow-y:auto;padding:24px;`;
+      document.body.appendChild(panel);
+    }
+    const statusLabel2 = { draft:'草稿', submitted:'提交版', dept_review:'部门领导审核中', office_review:'局办领导审核中', reviewed:'已审核', scheduled:'上会排期', sched_dept_review:'排期议题局办领导初审', sched_leader_review:'排期议题局领导审核', sched_reviewed:'排期议题已审核', meeting_done:'已上会', archived:'已归档', rejected:'已驳回' };
+    let approvalHtml = (a.approvals||[]).map(ap =>
+      `<div style="padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px">
+        <span style="color:#999">${ap.created_at?.slice(0,16)||''}</span>
+        <span style="margin-left:8px;font-weight:500">${ap.op_name}</span>
+        <span style="margin-left:8px;color:${ap.action.includes('reject')?'#ff4d4f':'#52c41a'}">${ap.action}</span>
+        ${ap.comment?`<span style="margin-left:8px;color:#666">${ap.comment}</span>`:''}
+      </div>`
+    ).join('') || '<div style="color:#bbb;font-size:13px">暂无审批记录</div>';
+
+    panel.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div style="font-size:16px;font-weight:700;color:#333">议题详情</div>
+        <button onclick="document.getElementById('agendaDetailPanel').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999">✕</button>
+      </div>
+      <div style="background:#f7f9ff;border-radius:8px;padding:16px;margin-bottom:16px">
+        <div style="font-size:15px;font-weight:600;color:#333;margin-bottom:8px">${a.title}</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:#666">
+          <span>📋 编号: ${a.serial_no||'-'}</span>
+          <span>🏢 部门: ${a.dept}</span>
+          <span>📂 类型: ${a.category}</span>
+          <span>💰 金额: ${a.amount>0?a.amount+'万元':'-'}</span>
+        </div>
+        <div style="margin-top:8px;font-size:13px">状态: <span class="tag tag-review">${statusLabel2[a.status]||a.status}</span></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:8px">📄 议题内容</div>
+        <div style="font-size:14px;color:#555;line-height:1.7;background:#fafafa;border-radius:6px;padding:14px;white-space:pre-wrap">${a.content||'（无内容）'}</div>
+      </div>
+      ${a.summary?`<div style="margin-bottom:16px"><div style="font-size:13px;font-weight:600;color:#333;margin-bottom:6px">📝 摘要</div><div style="font-size:13px;color:#666;padding:10px;background:#f0f7ff;border-radius:6px">${a.summary}</div></div>`:''}
+      <div style="margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;color:#333;margin-bottom:8px">📋 审批记录</div>
+        ${approvalHtml}
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:16px;border-top:1px solid #f0f0f0">
+        ${a.status==='draft'?`<button class="btn btn-primary" onclick="submitAgenda(${a.id});document.getElementById('agendaDetailPanel').remove()">提交审核</button>`:''}
+        ${a.status==='submitted'?`<button class="btn btn-success" onclick="agendaAction(${a.id},'dept_pass','');document.getElementById('agendaDetailPanel').remove()">科室通过</button><button class="btn btn-danger" onclick="agendaAction(${a.id},'dept_reject','驳回');document.getElementById('agendaDetailPanel').remove()">驳回</button>`:''}
+        <button class="btn btn-default" onclick="document.getElementById('agendaDetailPanel').remove()">关闭</button>
+      </div>`;
+  } catch(e) {
+    showToast('加载议题详情失败: ' + e.message);
+  }
+}
+
+// ── 提交议题 ──
+async function submitAgenda(id) {
+  if (!confirm('确认提交该议题至科室负责人审核？')) return;
+  try {
+    await POST('/agendas/' + id + '/action', { action: 'submit', comment: '' });
+    showToast('✅ 议题已提交审核！');
+    refreshAgendaList();
+  } catch(e) { showToast('提交失败: ' + e.message); }
+}
+
+// ── 执行审批动作 ──
+async function agendaAction(id, action, comment) {
+  try {
+    const res = await POST('/agendas/' + id + '/action', { action, comment });
+    showToast('✅ 操作成功，状态更新为: ' + res.new_status);
+    refreshAgendaList();
+  } catch(e) { showToast('操作失败: ' + e.message); }
+}
+
+// ── 删除议题 ──
+async function deleteAgenda(id) {
+  if (!confirm('确认废止该议题？此操作不可撤销。')) return;
+  try {
+    await DEL('/agendas/' + id);
+    showToast('✅ 议题已废止');
+    refreshAgendaList();
+  } catch(e) { showToast('操作失败: ' + e.message); }
+}
+
+// ── 写议题 - 保存到数据库 ──
+async function saveNewAgenda() {
+  const title   = document.getElementById('topicTitle')?.value?.trim();
+  const content = document.getElementById('topicContent')?.value?.trim();
+  const summary = document.getElementById('topicSummary')?.value?.trim();
+  const amount  = parseFloat(document.getElementById('topicAmount')?.value) || 0;
+  const category= document.getElementById('topicCategory')?.value || '行政事项';
+
+  if (!title)   { showToast('请填写议题标题'); return null; }
+  if (!content) { showToast('请填写议题内容'); return null; }
+
+  // 未登录 → 弹登录
+  if (!_token) { showLoginModal(); showToast('请先登录'); return null; }
+
+  try {
+    const res = await POST('/agendas', { title, content, summary, amount, category, source: 'write' });
+    showToast('✅ 议题已保存！编号: ' + res.serial_no);
+    refreshAgendaList();
+    return res;
+  } catch(e) {
+    const msg = e.message || '';
+    if (msg.includes('后端服务未启动') || msg.includes('Failed to fetch')) {
+      // 降级：本地存储
+      const demoAgendas = JSON.parse(localStorage.getItem('demo_agendas') || '[]');
+      const demoId = 'DEMO-' + (demoAgendas.length + 1);
+      const newAgenda = { id: demoId, serial_no: demoId, title, content, summary, amount, category, source: 'write', status: 'draft', dept: '场馆中心', created_at: new Date().toISOString(), creator_name: '缪逸飞' };
+      demoAgendas.push(newAgenda);
+      localStorage.setItem('demo_agendas', JSON.stringify(demoAgendas));
+      showToast('⚠️ 后端未启动，已保存到本地（演示模式）');
+      return newAgenda;
+    }
+    showToast('保存失败: ' + msg);
+    return null;
+  }
+}
+
+// ── 写议题 - 提交（保存+提交） ──
+async function onTopicSubmitDB() {
+  const res = await saveNewAgenda();
+  if (res) {
+    await submitAgenda(res.id);
+    document.getElementById('submitDownloadBox').style.display = 'flex';
+  }
+}
+
+// ── 统计数据加载 ──
+async function loadStats() {
+  try {
+    const s = await GET('/stats/overview');
+    // 首页统计数字
+    const setEl = (id, v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+    setEl('statTotalAgendas',    s.total_agendas    || 0);
+    setEl('statPendingAgendas',  s.pending_agendas  || 0);
+    setEl('statMeetingsFinished',s.meetings_finished|| 0);
+
+    // 数据统计页
+    setEl('statsIncome', (s.income||0).toLocaleString() + '万元');
+    setEl('statsSpend',  (s.spend||0).toLocaleString()  + '万元');
+
+    // 各部门支出排行
+    const rankEl = document.getElementById('statsDeptRank');
+    if (rankEl && s.dept_spend) {
+      rankEl.innerHTML = s.dept_spend.slice(0,5).map((d,i)=>
+        `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="width:22px;height:22px;border-radius:50%;background:${i<3?'#1677ff':'#f0f0f0'};color:${i<3?'#fff':'#999'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">${i+1}</span>
+            <span style="font-size:14px">${d.dept}</span>
+          </div>
+          <span style="font-size:14px;font-weight:600;color:#333">${d.amount}万元</span>
+        </div>`
+      ).join('');
+    }
+
+    // 三重一大事项
+    const major3El = document.getElementById('statsMajor3');
+    if (major3El && s.major3) {
+      major3El.innerHTML = s.major3.map(a=>
+        `<div onclick="showAgendaDetail(${a.id})" style="padding:10px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 0.2s" onmouseover="this.style.background='#f7f9ff'" onmouseout="this.style.background=''">
+          <div style="font-size:14px;font-weight:500;color:#333;margin-bottom:4px">${a.title}</div>
+          <div style="font-size:12px;color:#999">${a.dept} · ${(a.created_at||'').slice(0,10)}</div>
+        </div>`
+      ).join('') || '<div style="color:#bbb;padding:20px;text-align:center">暂无三重一大事项</div>';
+    }
+  } catch(e) { console.warn('加载统计失败', e.message); }
+}
+
+// ── 会议列表加载 ──
+async function loadMeetings() {
+  try {
+    const meetings = await GET('/meetings');
+    const sel = document.getElementById('leaderBatchSelect');
+    const sel2 = document.getElementById('leaderMinBatchSelect');
+    if (sel) {
+      sel.innerHTML = '<option value="">-- 选择批次 --</option>' +
+        meetings.map(m=>`<option value="${m.id}">${m.batch_no} · ${m.title}</option>`).join('');
+    }
+    if (sel2) {
+      sel2.innerHTML = '<option value="">-- 选择批次 --</option>' +
+        meetings.map(m=>`<option value="${m.id}">${m.batch_no} · ${m.title}</option>`).join('');
+    }
+  } catch(e) { console.warn('加载会议失败', e.message); }
+}
+
+// ── 通知加载 ──
+async function loadNotifications() {
+  try {
+    const res = await GET('/notifications');
+    const badge = document.getElementById('notifBadge');
+    if (badge) badge.textContent = res.unread > 0 ? res.unread : '';
+    const list = document.getElementById('notifList');
+    if (list) {
+      list.innerHTML = (res.list||[]).slice(0,10).map(n =>
+        `<div style="padding:10px 12px;border-bottom:1px solid #f0f0f0;background:${n.is_read?'#fff':'#f0f7ff'};cursor:pointer" onclick="markNotifRead()">
+          <div style="font-size:13px;font-weight:${n.is_read?'400':'600'};color:#333">${n.title}</div>
+          <div style="font-size:12px;color:#999;margin-top:2px">${(n.created_at||'').slice(0,16)}</div>
+        </div>`
+      ).join('') || '<div style="color:#bbb;padding:20px;text-align:center">暂无通知</div>';
+    }
+  } catch(e) { console.warn('加载通知失败', e.message); }
+}
+async function markNotifRead() {
+  try { await POST('/notifications/read-all'); loadNotifications(); } catch(e) {}
+}
+
+// ── 登录弹窗 ──
+function showLoginModal() {
+  let modal = document.getElementById('loginModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'loginModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center';
+    modal.innerHTML = `
+      <div style="background:#fff;border-radius:16px;padding:36px;width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3)" id="loginBox">
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="font-size:24px;margin-bottom:8px">🏟️</div>
+          <div style="font-size:18px;font-weight:700;color:#333">北京市朝阳区体育局</div>
+          <div style="font-size:13px;color:#999;margin-top:4px">议题全生命周期管理平台</div>
+        </div>
+        <!-- Tab 切换 -->
+        <div style="display:flex;border-bottom:2px solid #f0f0f0;margin-bottom:20px">
+          <button onclick="switchAuthTab('login')" id="tabLoginBtn"
+            style="flex:1;border:none;background:none;padding:10px;font-size:14px;font-weight:600;color:#1677ff;cursor:pointer;border-bottom:2px solid #1677ff;margin-bottom:-2px">
+            登 录
+          </button>
+          <button onclick="switchAuthTab('register')" id="tabRegisterBtn"
+            style="flex:1;border:none;background:none;padding:10px;font-size:14px;font-weight:500;color:#999;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px">
+            注 册
+          </button>
+        </div>
+        <!-- 登录表单 -->
+        <div id="loginForm" style="display:block">
+          <div style="margin-bottom:14px">
+            <label style="font-size:13px;color:#666;display:block;margin-bottom:6px">用户名</label>
+            <input id="loginUser" type="text" placeholder="请输入用户名" value="miao_yifei"
+              style="width:100%;border:1px solid #d9d9d9;border-radius:8px;padding:10px 14px;font-size:14px;box-sizing:border-box">
+          </div>
+          <div style="margin-bottom:24px">
+            <label style="font-size:13px;color:#666;display:block;margin-bottom:6px">密码</label>
+            <input id="loginPass" type="password" placeholder="请输入密码" value="staff123"
+              style="width:100%;border:1px solid #d9d9d9;border-radius:8px;padding:10px 14px;font-size:14px;box-sizing:border-box"
+              onkeydown="if(event.key==='Enter') confirmLogin()">
+          </div>
+          <button onclick="confirmLogin()" style="width:100%;background:#1677ff;color:#fff;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:600;cursor:pointer">
+            登 录
+          </button>
+          <div style="margin-top:16px;font-size:12px;color:#bbb;text-align:center">
+            测试账号: admin/admin123 · leader/leader123 · miao_yifei/staff123
+          </div>
+        </div>
+        <!-- 注册表单 -->
+        <div id="registerForm" style="display:none">
+          <div style="margin-bottom:12px">
+            <label style="font-size:13px;color:#666;display:block;margin-bottom:6px">用户名 <span style="color:#999;font-weight:400">(至少3个字符)</span></label>
+            <input id="regUser" type="text" placeholder="请输入用户名"
+              style="width:100%;border:1px solid #d9d9d9;border-radius:8px;padding:10px 14px;font-size:14px;box-sizing:border-box">
+          </div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:13px;color:#666;display:block;margin-bottom:6px">姓名 <span style="color:#999;font-weight:400">(真实姓名)</span></label>
+            <input id="regName" type="text" placeholder="请输入真实姓名"
+              style="width:100%;border:1px solid #d9d9d9;border-radius:8px;padding:10px 14px;font-size:14px;box-sizing:border-box">
+          </div>
+          <div style="margin-bottom:12px">
+            <label style="font-size:13px;color:#666;display:block;margin-bottom:6px">密码 <span style="color:#999;font-weight:400">(至少6个字符)</span></label>
+            <input id="regPass" type="password" placeholder="请输入密码"
+              style="width:100%;border:1px solid #d9d9d9;border-radius:8px;padding:10px 14px;font-size:14px;box-sizing:border-box">
+          </div>
+          <div style="margin-bottom:20px">
+            <label style="font-size:13px;color:#666;display:block;margin-bottom:6px">部门</label>
+            <select id="regDept" style="width:100%;border:1px solid #d9d9d9;border-radius:8px;padding:10px 14px;font-size:14px;box-sizing:border-box;background:#fff"
+              onkeydown="if(event.key==='Enter') confirmRegister()">
+              <option value="">请选择部门</option>
+              <option value="场馆中心">场馆中心</option>
+              <option value="局办公室">局办公室</option>
+              <option value="组织人事科">组织人事科</option>
+              <option value="信息中心">信息中心</option>
+              <option value="计财科">计财科</option>
+              <option value="纪检监察科">纪检监察科</option>
+            </select>
+          </div>
+          <button onclick="confirmRegister()" style="width:100%;background:#1677ff;color:#fff;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:600;cursor:pointer">
+            注 册
+          </button>
+          <div style="margin-top:12px;font-size:12px;color:#bbb;text-align:center">
+            注册成功后自动登录 · 默认角色为普通科员
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+  }
+  modal.style.display = 'flex';
+}
+
+function switchAuthTab(tab) {
+  const loginForm    = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const tabLogin     = document.getElementById('tabLoginBtn');
+  const tabRegister  = document.getElementById('tabRegisterBtn');
+  if (tab === 'login') {
+    loginForm.style.display    = 'block';
+    registerForm.style.display = 'none';
+    tabLogin.style.color       = '#1677ff';
+    tabLogin.style.fontWeight  = '600';
+    tabLogin.style.borderBottomColor = '#1677ff';
+    tabRegister.style.color    = '#999';
+    tabRegister.style.fontWeight = '500';
+    tabRegister.style.borderBottomColor = 'transparent';
+  } else {
+    loginForm.style.display    = 'none';
+    registerForm.style.display = 'block';
+    tabRegister.style.color    = '#1677ff';
+    tabRegister.style.fontWeight = '600';
+    tabRegister.style.borderBottomColor = '#1677ff';
+    tabLogin.style.color       = '#999';
+    tabLogin.style.fontWeight  = '500';
+    tabLogin.style.borderBottomColor = 'transparent';
+  }
+}
+
+async function doRegister(username, password, real_name, dept) {
+  const data = await POST('/auth/register', { username, password, real_name, dept });
+  _token = data.token;
+  _user  = data;
+  localStorage.setItem('agenda_token', _token);
+  localStorage.setItem('agenda_user',  JSON.stringify(data));
+  return data;
+}
+
+async function confirmRegister() {
+  const u = document.getElementById('regUser')?.value?.trim();
+  const n = document.getElementById('regName')?.value?.trim();
+  const p = document.getElementById('regPass')?.value?.trim();
+  const d = document.getElementById('regDept')?.value;
+
+  if (!u || !n || !p || !d) { showToast('请填写所有字段'); return; }
+  if (u.length < 3) { showToast('用户名至少 3 个字符'); return; }
+  if (p.length < 6) { showToast('密码至少 6 个字符'); return; }
+
+  const btn = document.querySelector('#registerForm button');
+  const origText = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = '注册中...'; btn.style.opacity = '0.7'; }
+
+  try {
+    const data = await doRegister(u, p, n, d);
+    document.getElementById('loginModal')?.remove();
+
+    const nameEl = document.getElementById('sidebarName');
+    const roleEl = document.getElementById('sidebarRole');
+    if (nameEl) nameEl.textContent = data.real_name;
+    if (roleEl) roleEl.textContent = data.dept;
+
+    navigate('home');
+    refreshAgendaList();
+    loadStats();
+    loadNotifications();
+    loadMeetings();
+    showToast('注册成功，欢迎 ' + data.real_name + '！');
+  } catch(e) {
+    console.error('[REGISTER]', e);
+    showToast('注册失败: ' + (e.message || '未知错误'));
+    if (btn) { btn.disabled = false; btn.textContent = origText; btn.style.opacity = '1'; }
+  }
+}
+
+async function confirmLogin() {
+  const u = document.getElementById('loginUser')?.value?.trim();
+  const p = document.getElementById('loginPass')?.value?.trim();
+  if (!u || !p) { showToast('请填写用户名和密码'); return; }
+
+  // 禁用按钮防重复点击 + 显示加载状态
+  const btn = document.querySelector('#loginModal button');
+  const origText = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = '登录中...'; btn.style.opacity = '0.7'; }
+
+  try {
+    // 8 秒超时保护，避免后端挂了用户一直等
+    const data = await Promise.race([
+      doLogin(u, p),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('连接超时，请确认后端服务已启动')), 8000))
+    ]);
+
+    document.getElementById('loginModal')?.remove();
+
+    // 更新侧边栏显示
+    const nameEl = document.getElementById('sidebarName');
+    const roleEl = document.getElementById('sidebarRole');
+    if (nameEl) nameEl.textContent = data.real_name;
+    if (roleEl) roleEl.textContent = data.dept || '场馆中心';
+
+    // 跳转到首页并刷新数据
+    navigate('home');
+    refreshAgendaList();
+    loadStats();
+    loadNotifications();
+    loadMeetings();
+    showToast('✅ 欢迎回来，' + data.real_name + '！');
+  } catch(e) {
+    console.error('[LOGIN]', e);
+    showToast('❌ 登录失败: ' + (e.message || '账号或密码错误'));
+    // 恢复按钮状态
+    if (btn) { btn.disabled = false; btn.textContent = origText; btn.style.opacity = '1'; }
+  }
+}
+
+// ── 页面切换时自动刷新数据 ──
+const _origShowPage = typeof showPage === 'function' ? showPage : null;
+function showPage(pageId) {
+  if (_origShowPage) _origShowPage(pageId);
+  // 需要登录的页面
+  if (pageId === 'page-agendas' || pageId === 'page-write' || pageId === 'page-stats' || pageId === 'page-leader-pool' || pageId === 'page-leader-minutes') {
+    if (!_token) { showLoginModal(); return; }
+  }
+  // 切换到议题库自动刷新列表
+  if (pageId === 'page-agendas') refreshAgendaList();
+  if (pageId === 'page-stats') loadStats();
+  if (pageId === 'page-leader-pool' || pageId === 'page-leader-minutes') loadMeetings();
+}
+
+// ── 页面加载完成后初始化 ──
+window.addEventListener('DOMContentLoaded', function() {
+  // 检查是否已有 token，若无则弹登录
+  if (!_token) {
+    setTimeout(showLoginModal, 500);
+  } else {
+    loadStats();
+    loadNotifications();
+    loadMeetings();
+  }
+});
+</script>
+
+</body>
+</html>

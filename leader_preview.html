@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>北京市朝阳区体育局 · 议题全生命周期管理平台（局领导视角）V1.0</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; display: flex; min-height: 100vh; }
+
+/* ===== 左侧导航 ===== */
+.sidebar {
+  width: 220px; background: #001529; color: #fff; display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; overflow-y: auto;
+}
+.sidebar-logo { padding: 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-logo h2 { font-size: 16px; color: #fff; }
+.sidebar-logo p { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+
+.sidebar-section { padding: 8px 0; }
+.sidebar-section-title { font-size: 11px; color: rgba(255,255,255,0.35); padding: 12px 16px 6px; text-transform: uppercase; letter-spacing: 1px; }
+.sidebar-item {
+  display: flex; align-items: center; gap: 10px; padding: 11px 20px;
+  font-size: 14px; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+.sidebar-item:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.sidebar-item.active { color: #fff; background: #722ed1; border-left-color: #b37feb; }
+
+.sidebar-bottom { margin-top: auto; padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.1); }
+.user-avatar { width: 32px; height: 32px; border-radius: 16px; background: #fa8c16; color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; }
+.user-info { display:flex; align-items:center; gap:10px; }
+.user-detail { font-size: 13px; color: rgba(255,255,255,0.85); }
+.user-role { font-size: 11px; color: rgba(255,255,255,0.45); }
+
+/* ===== 主区域 ===== */
+.main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+.topbar {
+  background: #fff; padding: 0 24px; height: 56px; display: flex; align-items: center;
+  justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-title { font-size: 18px; font-weight: 600; color: #333; }
+.topbar-badge { font-size: 12px; color: #722ed1; background: #f9f0ff; padding: 3px 12px; border-radius: 12px; font-weight: 500; }
+.topbar-time { font-size: 13px; color: #999; }
+
+.page { display: none; padding: 20px 24px; flex: 1; }
+.page.active { display: block; }
+
+/* ===== 首页 ===== */
+.welcome-banner {
+  background: linear-gradient(135deg, #722ed1 0%, #b37feb 100%);
+  border-radius: 12px; padding: 24px 28px; color: #fff; margin-bottom: 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.welcome-text h2 { font-size: 20px; margin-bottom: 6px; }
+.welcome-text p { font-size: 13px; opacity: 0.85; }
+.welcome-stat { text-align: center; }
+.welcome-stat .num { font-size: 36px; font-weight: 700; }
+.welcome-stat .label { font-size: 13px; opacity: 0.8; }
+
+.card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+.stat-card2 { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: box-shadow 0.2s; }
+.stat-card2:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+.stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.stat-icon.blue { background: #e6f4ff; }
+.stat-icon.orange { background: #fff7e6; }
+.stat-icon.green { background: #f6ffed; }
+.stat-icon.purple { background: #f9f0ff; }
+.stat-num2 { font-size: 28px; font-weight: 700; color: #333; }
+.stat-label2 { font-size: 13px; color: #999; margin-top: 2px; }
+
+.section-card {
+  background: #fff; border-radius: 10px; padding: 20px; margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.section-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+.section-title .more { font-size: 13px; color: #1677ff; cursor: pointer; }
+
+.quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.quick-item {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 20px 12px; background: #f7f9ff; border-radius: 10px; cursor: pointer;
+  transition: all 0.2s;
+}
+.quick-item:hover { background: #e6f4ff; transform: translateY(-2px); }
+.quick-icon { font-size: 28px; }
+.quick-text { font-size: 13px; color: #444; font-weight: 500; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.topic-table { width: 100%; border-collapse: collapse; }
+.topic-table th { text-align: left; font-size: 13px; color: #999; padding: 10px 12px; border-bottom: 1px solid #f0f0f0; font-weight: 500; }
+.topic-table td { padding: 12px; border-bottom: 1px solid #f9f9f9; font-size: 14px; color: #333; }
+.topic-table tr:hover td { background: #fafafa; cursor: pointer; }
+.topic-table .col-title { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ===== 表单通用 ===== */
+.form-container { max-width: 960px; margin: 0 auto; }
+.form-container-wide { max-width: 1200px; margin: 0 auto; }
+.form-section { background: #fff; border-radius: 10px; padding: 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.form-section-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px; }
+.form-row { margin-bottom: 16px; }
+.form-row:last-child { margin-bottom: 0; }
+.form-label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; font-weight: 500; }
+.form-input, .form-textarea, .form-select {
+  width: 100%; border: 1px solid #d9d9d9; border-radius: 6px; padding: 9px 12px;
+  font-size: 14px; color: #333; font-family: inherit; transition: border-color 0.2s;
+  background: #fff; resize: vertical;
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus { border-color: #722ed1; outline: none; box-shadow: 0 0 0 2px rgba(114,46,209,0.1); }
+.form-select { cursor: pointer; }
+
+/* ===== 按钮 ===== */
+.btn-row { display: flex; gap: 12px; justify-content: flex-end; padding: 0; margin-top: 8px; }
+.btn { padding: 9px 24px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-sm { padding: 5px 14px; border-radius: 4px; font-size: 12px; }
+.btn-primary { background: #722ed1; color: #fff; }
+.btn-primary:hover { background: #9254de; }
+.btn-default { background: #fff; color: #666; border: 1px solid #d9d9d9; }
+.btn-default:hover { border-color: #722ed1; color: #722ed1; }
+.btn-success { background: #52c41a; color: #fff; }
+.btn-success:hover { background: #73d13d; }
+.btn-download { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+.btn-download:hover { background: #d9f7be; }
+
+/* ===== 标签 ===== */
+.tag { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 12px; white-space: nowrap; }
+.tag-review { background: #e6f4ff; color: #1677ff; }
+.tag-pending { background: #fff7e6; color: #fa8c16; }
+.tag-archived { background: #f6ffed; color: #52c41a; }
+.tag-converted { background: #f9f0ff; color: #722ed1; }
+
+/* ===== 统计 ===== */
+.stats-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.stat-card-big {
+  background: #fff; border-radius: 10px; padding: 20px; text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.stat-big-num { font-size: 36px; font-weight: 700; color: #722ed1; }
+.stat-big-label { font-size: 13px; color: #999; margin-top: 6px; }
+
+.dept-table { width: 100%; border-collapse: collapse; }
+.dept-table th, .dept-table td { padding: 10px 12px; text-align: center; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+.dept-table th { color: #999; font-weight: 500; }
+.dept-table th:first-child, .dept-table td:first-child { text-align: left; }
+.rank-badge { display: inline-flex; width: 28px; height: 28px; border-radius: 14px; background: #f0f0f0; color: #999; font-size: 13px; align-items: center; justify-content: center; font-weight: 700; }
+.rank-badge.gold { background: #ffd700; color: #fff; }
+.rank-badge.silver { background: #c0c0c0; color: #fff; }
+.rank-badge.bronze { background: #cd7f32; color: #fff; }
+
+/* ===== 领导视角专属 ===== */
+.leader-batch-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.leader-batch-card {
+  background: #fff; border: 2px solid #e8e8e8; border-radius: 10px; padding: 18px; cursor: pointer; transition: all 0.2s;
+}
+.leader-batch-card:hover { border-color: #faad14; box-shadow: 0 2px 8px rgba(250,173,20,0.15); }
+.leader-batch-card .lb-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 6px; }
+.leader-batch-card .lb-meta { font-size: 12px; color: #999; display: flex; gap: 16px; }
+.leader-batch-card .lb-count { font-size: 13px; color: #fa8c16; font-weight: 600; }
+
+.leader-split { display: grid; grid-template-columns: 400px 1fr; gap: 16px; min-height: 520px; }
+.leader-left { border: 1px solid #e8e8e8; border-radius: 8px; overflow-y: auto; max-height: 600px; background: #fff; }
+.leader-left-header { padding: 12px 16px; background: #fafafa; border-bottom: 1px solid #f0f0f0; font-size: 14px; font-weight: 600; color: #333; position: sticky; top: 0; }
+.leader-right { border: 1px solid #e8e8e8; border-radius: 8px; overflow-y: auto; max-height: 600px; background: #fff; }
+.leader-right-header { padding: 12px 16px; background: #fafafa; border-bottom: 1px solid #f0f0f0; font-size: 14px; font-weight: 600; color: #333; position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; }
+.leader-right-body { padding: 20px; font-size: 14px; line-height: 2; color: #333; }
+.leader-topic-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #f9f9f9; cursor: pointer; transition: background 0.15s; }
+.leader-topic-item:hover { background: #fafafa; }
+.leader-topic-item.active { background: #fff7e6; border-left: 3px solid #fa8c16; }
+.leader-topic-item .lt-title { flex: 1; font-size: 14px; color: #333; }
+.leader-topic-item .lt-dept { font-size: 12px; color: #999; white-space: nowrap; }
+
+.leader-approve-bar { background: #fff7e6; border-radius: 8px; padding: 16px 20px; margin-top: 16px; display: flex; align-items: center; gap: 12px; border: 1px solid #ffd591; }
+.leader-approve-bar textarea { flex: 1; border: 1px solid #ffd591; border-radius: 6px; padding: 8px 12px; font-size: 13px; resize: none; height: 48px; font-family: inherit; }
+.leader-approve-bar textarea:focus { outline: none; border-color: #fa8c16; }
+
+/* ===== Toast ===== */
+#toast {
+  display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.75); color: #fff; padding: 12px 24px; border-radius: 8px;
+  font-size: 14px; z-index: 9999;
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 左侧导航 ===== -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h2>🏟️ 议题全生命周期管理平台</h2>
+    <p>北京市朝阳区体育局 · 局领导视角 V1.0</p>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">主要功能</div>
+    <div class="sidebar-item active" id="nav-home" onclick="navigate('home')"><span class="icon">🏠</span>首 页</div>
+    <div class="sidebar-item" id="nav-pool" onclick="navigate('pool')"><span class="icon">📥</span>上会议题</div>
+    <div class="sidebar-item" id="nav-minutes" onclick="navigate('minutes')"><span class="icon">📋</span>会议纪要</div>
+    <div class="sidebar-item" id="nav-stats" onclick="navigate('stats')"><span class="icon">📊</span>数据统计</div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-info">
+      <div class="user-avatar">局</div>
+      <div>
+        <div class="user-detail">局领导</div>
+        <div class="user-role">局长办公会 · 审批权限</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== 主区域 ===== -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="pageTitle">首页（局领导）</div>
+    <div class="topbar-actions" style="display:flex;align-items:center;gap:16px">
+      <span class="topbar-badge">👤 局领导视角</span>
+      <span class="topbar-time">2026年6月2日 星期二</span>
+    </div>
+  </div>
+
+  <!-- ===== Page: 首页 ===== -->
+  <div class="page active" id="page-home">
+    <div class="welcome-banner" style="background: linear-gradient(135deg, #722ed1 0%, #b37feb 100%);">
+      <div class="welcome-text">
+        <h2>👤 欢迎回来，局领导</h2>
+        <p>局长办公会 · 您有 8 条待审议题，3 条待签纪要</p>
+      </div>
+      <div class="welcome-stat">
+        <div class="num">246</div>
+        <div class="label">全局议题总数</div>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div class="stat-card2" onclick="navigate('pool')">
+        <div class="stat-icon orange">📥</div>
+        <div><div class="stat-num2">8</div><div class="stat-label2">待审议题</div></div>
+      </div>
+      <div class="stat-card2" onclick="navigate('minutes')">
+        <div class="stat-icon purple">📋</div>
+        <div><div class="stat-num2">3</div><div class="stat-label2">待签纪要</div></div>
+      </div>
+      <div class="stat-card2" onclick="navigate('stats')">
+        <div class="stat-icon green">📊</div>
+        <div><div class="stat-num2">1,880万</div><div class="stat-label2">年度支出累计</div></div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">📋 待审议题 · 按局长办公会批次</div>
+      <div class="leader-batch-cards">
+        <div class="leader-batch-card" onclick="navigate('pool')" style="border-left:4px solid #fa8c16">
+          <div class="lb-title">第22次局长办公会</div>
+          <div class="lb-meta"><span>2026年6月5日</span><span class="lb-count">待审 3 条</span></div>
+        </div>
+        <div class="leader-batch-card" onclick="navigate('pool')">
+          <div class="lb-title">第23次局长办公会</div>
+          <div class="lb-meta"><span>2026年6月19日</span><span class="lb-count">待审 5 条</span></div>
+        </div>
+        <div class="leader-batch-card" onclick="navigate('pool')">
+          <div class="lb-title">第24次局长办公会</div>
+          <div class="lb-meta"><span>2026年7月3日</span><span class="lb-count">待审 0 条</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">快捷入口</div>
+      <div class="quick-grid">
+        <div class="quick-item" onclick="navigate('pool')"><div class="quick-icon">📥</div><div class="quick-text">上会议题</div></div>
+        <div class="quick-item" onclick="navigate('minutes')"><div class="quick-icon">📋</div><div class="quick-text">会议纪要</div></div>
+        <div class="quick-item" onclick="navigate('stats')"><div class="quick-icon">📊</div><div class="quick-text">数据统计</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Page: 上会议题 ===== -->
+  <div class="page" id="page-pool">
+    <div class="form-container-wide">
+      <div class="form-row" style="margin-bottom:18px">
+        <label class="form-label">选择局长办公会批次</label>
+        <select class="form-select" style="max-width:400px" id="leaderPoolBatch" onchange="onLeaderPoolBatch()">
+          <option value="22">第22次局长办公会 · 2026年6月5日（3条待审）</option>
+          <option value="23">第23次局长办公会 · 2026年6月19日（5条待审）</option>
+          <option value="24">第24次局长办公会 · 2026年7月3日（无待审）</option>
+        </select>
+      </div>
+
+      <div class="leader-split" id="leaderPoolView">
+        <!-- 左栏：议题列表 -->
+        <div class="leader-left">
+          <div class="leader-left-header" style="display:flex;justify-content:space-between;align-items:center">
+            <span>议题列表</span>
+            <button class="btn btn-sm" style="font-size:11px;padding:3px 10px;background:#f0f7ff;border:1px solid #91caff;color:#1677ff;border-radius:4px;cursor:pointer" onclick="leaderSelectAll()">全选预览</button>
+          </div>
+          <div class="leader-topic-item active" id="lt-item-0" onclick="leaderSelectTopic(0)">
+            <span class="lt-title">关于奥林匹克体育中心场馆维修改造项目启动的议题</span>
+            <span class="lt-dept">场馆中心 · 85万元</span>
+          </div>
+          <div class="leader-topic-item" id="lt-item-1" onclick="leaderSelectTopic(1)">
+            <span class="lt-title">关于2026年暑期青少年体育培训项目经费申请的议题</span>
+            <span class="lt-dept">青少科 · 32万元</span>
+          </div>
+          <div class="leader-topic-item" id="lt-item-2" onclick="leaderSelectTopic(2)">
+            <span class="lt-title">关于体育局办公区消防安全设施更新的议题</span>
+            <span class="lt-dept">场馆中心 · 18万元</span>
+          </div>
+          <div class="leader-topic-item" id="lt-item-3" onclick="leaderSelectTopic(3)">
+            <span class="lt-title">关于第一体校整体改造提升方案的议题</span>
+            <span class="lt-dept">第一体校 · 320万元</span>
+          </div>
+          <div class="leader-topic-item" id="lt-item-4" onclick="leaderSelectTopic(4)">
+            <span class="lt-title">关于2026年度体育局中层干部调整方案的议题</span>
+            <span class="lt-dept">组织人事科 · —</span>
+          </div>
+        </div>
+
+        <!-- 右栏：议题内容预览 -->
+        <div class="leader-right">
+          <div class="leader-right-header">
+            <span id="leaderPreviewTitle">议题内容预览</span>
+            <span style="font-size:12px;color:#999;font-weight:400" id="leaderPreviewHint">第22次局长办公会</span>
+          </div>
+          <div class="leader-right-body" id="leaderPreviewContent">
+            <!-- JS动态填充 -->
+          </div>
+          <!-- 批示审批栏 -->
+          <div class="leader-approve-bar" style="margin:0 16px 16px 16px">
+            <textarea id="leaderComment" placeholder="输入批示意见（选填）..."></textarea>
+            <button class="btn btn-default btn-sm" onclick="showToast('议题已下载')">📥 下载</button>
+            <button class="btn btn-success btn-sm" onclick="leaderApprove()">✅ 通过</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Page: 会议纪要 ===== -->
+  <div class="page" id="page-minutes">
+    <div class="form-container-wide">
+      <div class="form-row" style="margin-bottom:18px">
+        <label class="form-label">选择局长办公会批次</label>
+        <select class="form-select" style="max-width:400px" id="leaderMinBatch" onchange="onLeaderMinBatch()">
+          <option value="21">第21次局长办公会 · 2026年5月22日（已上会，待签）</option>
+          <option value="20">第20次局长办公会 · 2026年5月8日（已签发）</option>
+          <option value="19">第19次局长办公会 · 2026年4月24日（已签发）</option>
+        </select>
+      </div>
+
+      <div class="leader-split" id="leaderMinView">
+        <!-- 左栏：议题列表 -->
+        <div class="leader-left">
+          <div class="leader-left-header" style="display:flex;justify-content:space-between;align-items:center">
+            <span>议题列表</span>
+            <button class="btn btn-sm" style="font-size:11px;padding:3px 10px;background:#f0f7ff;border:1px solid #91caff;color:#1677ff;border-radius:4px;cursor:pointer" onclick="leaderMinSelectAll()">全选预览</button>
+          </div>
+          <div class="leader-topic-item active" id="lm-item-0" onclick="leaderMinSelectTopic(0)">
+            <span class="lt-title">关于奥运功能区体育设施维护方案的议题</span>
+            <span class="lt-dept">场馆中心</span>
+          </div>
+          <div class="leader-topic-item" id="lm-item-1" onclick="leaderMinSelectTopic(1)">
+            <span class="lt-title">关于2026年度群众体育赛事经费拨付的议题</span>
+            <span class="lt-dept">群体科</span>
+          </div>
+          <div class="leader-topic-item" id="lm-item-2" onclick="leaderMinSelectTopic(2)">
+            <span class="lt-title">关于区体育产业引导资金分配方案的议题</span>
+            <span class="lt-dept">产业中心</span>
+          </div>
+          <div class="leader-topic-item" id="lm-item-3" onclick="leaderMinSelectTopic(3)">
+            <span class="lt-title">关于加强青少年体育训练体系建设的议题</span>
+            <span class="lt-dept">青少科</span>
+          </div>
+        </div>
+
+        <!-- 右栏：会议纪要内容预览 -->
+        <div class="leader-right">
+          <div class="leader-right-header">
+            <span id="leaderMinPreviewTitle">会议纪要预览</span>
+            <span style="font-size:12px;color:#999;font-weight:400" id="leaderMinPreviewHint">第21次局长办公会 · 2026年5月22日</span>
+          </div>
+          <div class="leader-right-body" id="leaderMinContent">
+            <!-- JS动态填充 -->
+          </div>
+          <!-- 批示签发栏 -->
+          <div class="leader-approve-bar" style="margin:0 16px 16px 16px;background:#f6ffed;border-color:#b7eb8f">
+            <textarea id="leaderMinComment" placeholder="输入批示或修改意见（选填）..."></textarea>
+            <button class="btn btn-download btn-sm" onclick="showToast('会议纪要已下载')">📥 下载</button>
+            <button class="btn btn-success" onclick="leaderMinSign()">✍️ 签 发</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Page: 数据统计 ===== -->
+  <div class="page" id="page-stats">
+    <div class="form-container-wide">
+      <div class="stats-cards">
+        <div class="stat-card-big"><div class="stat-big-num">246</div><div class="stat-big-label">全局议题总数</div></div>
+        <div class="stat-card-big"><div class="stat-big-num" style="color:#52c41a">32</div><div class="stat-big-label">本月新增</div></div>
+        <div class="stat-card-big"><div class="stat-big-num" style="color:#fa8c16">12</div><div class="stat-big-label">参与部门数</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="section-card" style="box-shadow:none">
+          <div class="section-title">💰 本年度支出/收入统计（单位：万元）</div>
+          <div style="display:flex;justify-content:space-around;align-items:flex-end;height:220px;padding:0 20px;margin-top:20px">
+            <div style="text-align:center">
+              <div style="width:56px;height:140px;background:#ff4d4f;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#ff4d4f">360</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">1月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:110px;background:#ff4d4f;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#ff4d4f">280</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">2月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:160px;background:#ff4d4f;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#ff4d4f">420</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">3月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:130px;background:#ff4d4f;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#ff4d4f">340</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">4月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:180px;background:#ff4d4f;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#ff4d4f">480</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">5月</span>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-around;align-items:flex-end;height:180px;padding:0 20px;margin-top:10px;border-top:1px dashed #f0f0f0;padding-top:20px">
+            <div style="text-align:center">
+              <div style="width:56px;height:90px;background:#52c41a;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#52c41a">220</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">1月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:60px;background:#52c41a;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#52c41a">150</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">2月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:80px;background:#52c41a;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#52c41a">200</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">3月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:100px;background:#52c41a;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#52c41a">260</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">4月</span>
+            </div>
+            <div style="text-align:center">
+              <div style="width:56px;height:120px;background:#52c41a;border-radius:6px 6px 0 0;margin:0 auto 8px;position:relative">
+                <span style="position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:600;white-space:nowrap;color:#52c41a">310</span>
+              </div>
+              <span style="font-size:12px;color:#999;margin-top:8px;display:block">5月</span>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:center;gap:24px;margin-top:16px;font-size:12px">
+            <span>🔴 <b>年度支出累计：</b><span style="color:#ff4d4f;font-weight:600">1,880万元</span></span>
+            <span>🟢 <b>年度收入累计：</b><span style="color:#52c41a;font-weight:600">1,140万元</span></span>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">🏆 各部门支出排行榜</div>
+          <table class="dept-table">
+            <thead><tr><th>排名</th><th>部门</th><th>支出金额</th><th>涉及议题数</th></tr></thead>
+            <tbody>
+              <tr><td><span class="rank-badge gold">1</span></td><td>场馆中心</td><td style="color:#ff4d4f;font-weight:600">485万元</td><td>18</td></tr>
+              <tr><td><span class="rank-badge silver">2</span></td><td>第一体校</td><td style="color:#ff4d4f;font-weight:600">320万元</td><td>12</td></tr>
+              <tr><td><span class="rank-badge bronze">3</span></td><td>第二体校</td><td style="color:#ff4d4f;font-weight:600">280万元</td><td>10</td></tr>
+              <tr><td><span class="rank-badge">4</span></td><td>局办公室</td><td style="color:#ff4d4f;font-weight:600">230万元</td><td>8</td></tr>
+              <tr><td><span class="rank-badge">5</span></td><td>青少科</td><td style="color:#ff4d4f;font-weight:600">195万元</td><td>15</td></tr>
+              <tr><td><span class="rank-badge">6</span></td><td>第三体校</td><td style="color:#ff4d4f;font-weight:600">170万元</td><td>7</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-card" style="border-left:4px solid #722ed1">
+        <div class="section-title">⚡ 三重一大事项议题 <span style="font-size:12px;color:#722ed1;font-weight:400">（重点关注）</span></div>
+        <table class="topic-table">
+          <thead><tr><th>议题标题</th><th>类型</th><th>部门</th><th>金额</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td class="col-title">🔗 关于奥林匹克体育中心场馆维修改造项目启动的议题</td><td>重大工程项目</td><td>场馆中心</td><td>85万元</td><td><span class="tag tag-review">审核中</span></td></tr>
+            <tr><td class="col-title">🔗 关于第一体校整体改造提升方案的议题</td><td>重大工程项目</td><td>第一体校</td><td>320万元</td><td><span class="tag tag-converted">已审议</span></td></tr>
+            <tr><td class="col-title">🔗 关于2026年度体育局中层干部调整方案的议题</td><td>重要人事任免</td><td>组织人事科</td><td>—</td><td><span class="tag tag-pending">待审核</span></td></tr>
+            <tr><td class="col-title">🔗 关于体育产业发展专项资金分配方案的议题</td><td>大额资金使用</td><td>产业中心</td><td>500万元</td><td><span class="tag tag-archived">已归档</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+// ===== 导航 =====
+function navigate(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name)?.classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('nav-' + name)?.classList.add('active');
+  
+  const titles = { home: '首页（局领导）', pool: '上会议题', minutes: '会议纪要', stats: '数据统计' };
+  document.getElementById('pageTitle').textContent = titles[name] || '议题系统';
+
+  if (name === 'pool') leaderInitPreview();
+  if (name === 'minutes') leaderMinInitPreview();
+}
+
+// ===== Toast =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none' }, 2000);
+}
+
+// ===== 上会议题 =====
+let leaderSelectedTopic = 0;
+const leaderTopics = [
+  {
+    title: '关于奥林匹克体育中心场馆维修改造项目启动的议题',
+    dept: '场馆中心', amount: '85万元', type: '启动类',
+    bg: '奥林匹克体育中心场馆设施自2018年投入使用以来，部分设备老化严重，游泳馆恒温系统故障频发，篮球馆地面磨损超标，已影响正常训练和赛事承办。为确保场馆安全运行，拟启动维修改造项目。',
+    detail: '1. 游泳馆恒温系统整体更换\n2. 篮球馆运动地板翻新\n3. 场馆消防设施升级改造\n4. 观众看台安全护栏更换',
+    ask: '请局领导审议批准奥林匹克体育中心场馆维修改造项目启动，项目预算85万元。'
+  },
+  {
+    title: '关于2026年暑期青少年体育培训项目经费申请的议题',
+    dept: '青少科', amount: '32万元', type: '比选类',
+    bg: '为丰富青少年暑期体育生活，落实全民健身计划，拟在2026年暑期组织篮球、游泳、羽毛球等体育培训项目，预计覆盖全区500名青少年。',
+    detail: '方案A：委托第三方专业机构承办（预算32万元）\n方案B：各场馆自行组织（预算28万元）\n方案C：与学校合作开展（预算25万元）',
+    ask: '请局领导审议比选方案，确定暑期青少年体育培训项目的承办方式和经费预算。'
+  },
+  {
+    title: '关于体育局办公区消防安全设施更新的议题',
+    dept: '场馆中心', amount: '18万元', type: '招投标类',
+    bg: '体育局办公区部分消防设施已超使用年限，灭火器需更换，部分楼层烟感报警器灵敏度下降，存在安全隐患。',
+    detail: '1. 更换过期灭火器120具\n2. 更新烟感报警器60个\n3. 增设应急照明设备30套\n4. 消防管道系统检修',
+    ask: '请局领导审议批准办公区消防设施更新项目招标方案，项目预算18万元。'
+  },
+  {
+    title: '关于第一体校整体改造提升方案的议题',
+    dept: '第一体校', amount: '320万元', type: '重大工程',
+    bg: '第一体校教学楼及训练场馆建于2005年，部分结构老化，训练设施落后，已无法满足当前体育教学和训练需求。拟对教学楼、训练馆、学生宿舍进行全面改造提升。',
+    detail: '1. 教学楼加固及外立面翻新\n2. 训练馆设施全面升级\n3. 学生宿舍改造\n4. 室外运动场地翻新',
+    ask: '请局领导审议批准第一体校整体改造提升方案，项目预算320万元。'
+  },
+  {
+    title: '关于2026年度体育局中层干部调整方案的议题',
+    dept: '组织人事科', amount: '—', type: '人事任免',
+    bg: '根据区委组织部统一部署和事业单位改革要求，结合体育局工作实际需要，拟对部分中层干部岗位进行调整优化。',
+    detail: '拟调整岗位共8个，涉及场馆中心、群体科、产业中心等部门。调整方案已经局党委会研究讨论。',
+    ask: '请局领导审议批准2026年度中层干部调整方案。'
+  }
+];
+
+function leaderInitPreview() {
+  leaderSelectedTopic = 0;
+  document.querySelectorAll('#page-pool .leader-topic-item').forEach((el, i) => {
+    el.classList.toggle('active', i === 0);
+  });
+  renderLeaderPreview(0);
+}
+
+function leaderSelectTopic(idx) {
+  leaderSelectedTopic = idx;
+  document.querySelectorAll('#page-pool .leader-topic-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+  renderLeaderPreview(idx);
+}
+
+function leaderSelectAll() {
+  let allContent = '';
+  leaderTopics.forEach((t, i) => {
+    allContent += '<div style="margin-bottom:24px;padding-bottom:16px;border-bottom:2px dashed #e8e8e8">';
+    allContent += '<div style="font-weight:600;font-size:15px;color:#722ed1;margin-bottom:8px">【议题' + (i+1) + '】' + t.title + '</div>';
+    allContent += '<div style="margin-bottom:4px"><b>部门：</b>' + t.dept + ' | <b>类型：</b>' + t.type + ' | <b>金额：</b>' + t.amount + '</div>';
+    allContent += '<div style="margin-bottom:4px"><b>背景：</b>' + t.bg + '</div>';
+    allContent += '<div style="margin-bottom:4px"><b>内容：</b><pre style="font-family:inherit;white-space:pre-wrap;margin:0;color:#555">' + t.detail + '</pre></div>';
+    allContent += '<div style="margin-bottom:0"><b>拟请事项：</b>' + t.ask + '</div>';
+    allContent += '</div>';
+  });
+  document.getElementById('leaderPreviewContent').innerHTML = allContent;
+  document.getElementById('leaderPreviewTitle').textContent = '全部议题预览（共' + leaderTopics.length + '条）';
+  document.querySelectorAll('#page-pool .leader-topic-item').forEach(el => el.classList.remove('active'));
+}
+
+function renderLeaderPreview(idx) {
+  const t = leaderTopics[idx];
+  const html = '<div style="font-weight:600;font-size:16px;color:#722ed1;margin-bottom:14px">' + t.title + '</div>'
+    + '<div style="display:flex;gap:20px;margin-bottom:10px"><span><b>提报部门：</b>' + t.dept + '</span><span><b>议题类型：</b>' + t.type + '</span><span><b>涉及金额：</b>' + t.amount + '</span></div>'
+    + '<hr style="border:none;border-top:1px dashed #e0e0e0;margin:12px 0">'
+    + '<div style="margin-bottom:8px"><b>议题背景：</b></div><p style="color:#555;margin-bottom:14px">' + t.bg + '</p>'
+    + '<div style="margin-bottom:8px"><b>主要内容：</b></div><pre style="font-family:inherit;white-space:pre-wrap;margin:0;color:#555;margin-bottom:14px">' + t.detail + '</pre>'
+    + '<div style="margin-bottom:4px"><b>拟请事项：</b></div><p style="color:#333">' + t.ask + '</p>';
+  document.getElementById('leaderPreviewContent').innerHTML = html;
+  document.getElementById('leaderPreviewTitle').textContent = '议题内容预览';
+  document.getElementById('leaderPreviewHint').textContent = '第22次局长办公会';
+}
+
+function onLeaderPoolBatch() {
+  showToast('已切换批次（演示）');
+  leaderInitPreview();
+}
+
+function leaderApprove() {
+  const comment = document.getElementById('leaderComment').value;
+  const topicTitle = leaderTopics[leaderSelectedTopic].title;
+  const msg = comment ? '已通过并附批示意见' : '已通过';
+  showToast('✅ ' + topicTitle.substring(0, 20) + '... ' + msg);
+  document.getElementById('leaderComment').value = '';
+}
+
+// ===== 会议纪要 =====
+let leaderMinSelected = 0;
+const leaderMinutes = [
+  {
+    title: '关于奥运功能区体育设施维护方案的议题',
+    dept: '场馆中心',
+    summary: '经审议，原则同意奥运功能区体育设施维护方案。项目预算120万元，分两期实施：第一期对鸟巢周边室外运动器材进行全面检修和更换，第二期对水立方游泳设施进行维护升级。',
+    decision: '批准。请场馆中心牵头，2026年7月底前完成第一期工程。',
+    status: '待签发'
+  },
+  {
+    title: '关于2026年度群众体育赛事经费拨付的议题',
+    dept: '群体科',
+    summary: '经审议，同意2026年度群众体育赛事经费拨付方案。全年计划组织群众体育赛事12项，涉及马拉松、广场舞、太极拳、乒乓球、羽毛球等项目，总预算200万元。',
+    decision: '批准。请群体科按月编制赛事执行方案，确保经费合理使用。',
+    status: '待签发'
+  },
+  {
+    title: '关于区体育产业引导资金分配方案的议题',
+    dept: '产业中心',
+    summary: '经审议，原则同意产业引导资金分配方案。2026年度安排专项资金500万元，用于扶持区内体育科技企业、体育培训机构和赛事运营公司发展。',
+    decision: '批准。请产业中心建立资金使用跟踪评估机制，每季度汇报使用情况。',
+    status: '待签发'
+  },
+  {
+    title: '关于加强青少年体育训练体系建设的议题',
+    dept: '青少科',
+    summary: '经审议，同意加强青少年体育训练体系建设方案。建立"区体校—学校—社会俱乐部"三级训练网络，实施"朝阳之星"青少年体育人才培养计划。',
+    decision: '批准。请青少科统筹协调，2026年9月前完成三级训练网络搭建。',
+    status: '待签发'
+  }
+];
+
+function leaderMinInitPreview() {
+  leaderMinSelected = 0;
+  document.querySelectorAll('#page-minutes .leader-topic-item').forEach((el, i) => {
+    el.classList.toggle('active', i === 0);
+  });
+  renderLeaderMinPreview(0);
+}
+
+function leaderMinSelectTopic(idx) {
+  leaderMinSelected = idx;
+  document.querySelectorAll('#page-minutes .leader-topic-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+  renderLeaderMinPreview(idx);
+}
+
+function leaderMinSelectAll() {
+  let allContent = '';
+  leaderMinutes.forEach((m, i) => {
+    allContent += '<div style="margin-bottom:24px;padding-bottom:16px;border-bottom:2px dashed #e8e8e8">';
+    allContent += '<div style="font-weight:600;font-size:15px;color:#722ed1;margin-bottom:8px">【议题' + (i+1) + '】' + m.title + '</div>';
+    allContent += '<div style="margin-bottom:4px"><b>提报部门：</b>' + m.dept + '</div>';
+    allContent += '<div style="margin-bottom:4px"><b>会议纪要：</b>' + m.summary + '</div>';
+    allContent += '<div style="margin-bottom:0"><b>会议决定：</b><span style="color:#52c41a;font-weight:500">' + m.decision + '</span></div>';
+    allContent += '</div>';
+  });
+  document.getElementById('leaderMinContent').innerHTML = allContent;
+  document.getElementById('leaderMinPreviewTitle').textContent = '全部会议纪要预览（共' + leaderMinutes.length + '条）';
+  document.querySelectorAll('#page-minutes .leader-topic-item').forEach(el => el.classList.remove('active'));
+}
+
+function renderLeaderMinPreview(idx) {
+  const m = leaderMinutes[idx];
+  const html = '<div style="font-weight:600;font-size:16px;color:#722ed1;margin-bottom:14px">' + m.title + '</div>'
+    + '<div style="margin-bottom:10px"><b>提报部门：</b>' + m.dept + ' | <b>状态：</b><span class="tag tag-pending">' + m.status + '</span></div>'
+    + '<hr style="border:none;border-top:1px dashed #e0e0e0;margin:12px 0">'
+    + '<div style="margin-bottom:8px"><b>📋 会议纪要：</b></div><p style="color:#555;margin-bottom:14px;line-height:2">' + m.summary + '</p>'
+    + '<div style="margin-bottom:4px"><b>✅ 会议决定：</b></div><p style="color:#52c41a;font-weight:500;line-height:2">' + m.decision + '</p>';
+  document.getElementById('leaderMinContent').innerHTML = html;
+  document.getElementById('leaderMinPreviewTitle').textContent = '会议纪要预览';
+  document.getElementById('leaderMinPreviewHint').textContent = '第21次局长办公会 · 2026年5月22日';
+}
+
+function onLeaderMinBatch() {
+  showToast('已切换批次（演示）');
+  leaderMinInitPreview();
+}
+
+function leaderMinSign() {
+  const comment = document.getElementById('leaderMinComment').value;
+  const title = leaderMinutes[leaderMinSelected].title;
+  const msg = comment ? '已签发并附修改意见' : '已签发';
+  showToast('✍️ ' + title.substring(0, 20) + '... ' + msg);
+  document.getElementById('leaderMinComment').value = '';
+}
+</script>
+
+</body>
+</html>

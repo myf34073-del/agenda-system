@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Database (auto-created on Railway)
+backend/agendas.db
+
+# Logs
+*.log
+backend/*.log
+
+# Test files
+backend/test_api.py
+backend/login_result.json
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# WorkBuddy
+.workbuddy/
+
+# Local scripts
+启动系统.bat
+start_backend.bat
+install_deps.bat
+
+# PRD extraction artifacts
+prd_content.txt
+prd_content_v*.txt
+prd_unpacked/
+prd_unpacked_v*/
+extract_prd*.py
+
+# Editor backups
+*~
+*.bak
