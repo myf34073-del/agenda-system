@@ -2054,9 +2054,9 @@ function editPoolTopic(title) {
 setTimeout(() => renderPoolTable(), 100);
 
 // ═══════════════════════════════════════════════════════════════
-//  后端 API 集成层  ·  对接 http://localhost:5001
+//  后端 API 集成层  ·  自动适配本地 / 云端
 // ═══════════════════════════════════════════════════════════════
-const API = 'http://localhost:5001/api';
+const API = '/api';
 let _token = localStorage.getItem('agenda_token') || '';
 let _user  = null;
 
@@ -2463,12 +2463,18 @@ function showLoginModal() {
             <select id="regDept" style="width:100%;border:1px solid #d9d9d9;border-radius:8px;padding:10px 14px;font-size:14px;box-sizing:border-box;background:#fff"
               onkeydown="if(event.key==='Enter') confirmRegister()">
               <option value="">请选择部门</option>
-              <option value="场馆中心">场馆中心</option>
               <option value="局办公室">局办公室</option>
               <option value="组织人事科">组织人事科</option>
-              <option value="信息中心">信息中心</option>
-              <option value="计财科">计财科</option>
-              <option value="纪检监察科">纪检监察科</option>
+              <option value="群体科">群体科</option>
+              <option value="市场科">市场科</option>
+              <option value="财审科">财审科</option>
+              <option value="青少科">青少科</option>
+              <option value="场馆中心">场馆中心</option>
+              <option value="第一体校">第一体校</option>
+              <option value="第二体校">第二体校</option>
+              <option value="第三体校">第三体校</option>
+              <option value="产业中心">产业中心</option>
+              <option value="体产中心">体产中心</option>
             </select>
           </div>
           <button onclick="confirmRegister()" style="width:100%;background:#1677ff;color:#fff;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:600;cursor:pointer">
@@ -2539,8 +2545,8 @@ async function confirmRegister() {
 
     const nameEl = document.getElementById('sidebarName');
     const roleEl = document.getElementById('sidebarRole');
-    if (nameEl) nameEl.textContent = data.real_name;
-    if (roleEl) roleEl.textContent = data.dept;
+    if (nameEl) nameEl.textContent = (data.dept || '场馆中心') + ' ' + data.real_name;
+    if (roleEl) roleEl.textContent = data.dept || '场馆中心';
 
     navigate('home');
     refreshAgendaList();
@@ -2574,10 +2580,10 @@ async function confirmLogin() {
 
     document.getElementById('loginModal')?.remove();
 
-    // 更新侧边栏显示
+    // 更新侧边栏显示（格式：部门 姓名）
     const nameEl = document.getElementById('sidebarName');
     const roleEl = document.getElementById('sidebarRole');
-    if (nameEl) nameEl.textContent = data.real_name;
+    if (nameEl) nameEl.textContent = (data.dept || '场馆中心') + ' ' + data.real_name;
     if (roleEl) roleEl.textContent = data.dept || '场馆中心';
 
     // 跳转到首页并刷新数据

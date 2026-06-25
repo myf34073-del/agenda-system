@@ -111,8 +111,12 @@ def auto_serial(dept):
     """生成议题编号: YYMM-DEPT-SEQ"""
     now  = datetime.now()
     ym   = now.strftime("%y%m")
-    dept_code = {"场馆中心": "CGZ", "局办公室": "JB", "组织人事科": "ZR",
-                 "信息中心": "XX"}.get(dept, dept[:2])
+    dept_code = {
+        "局办公室": "JB", "组织人事科": "ZR", "群体科": "QT",
+        "市场科": "SC", "财审科": "CS", "青少科": "QS",
+        "场馆中心": "CGZ", "第一体校": "YIX", "第二体校": "ERX",
+        "第三体校": "SAX", "产业中心": "CYZ", "体产中心": "TCZ"
+    }.get(dept, dept[:2])
     # 用 LIKE 匹配编号前缀，避免 strftime 对 TEXT 时间戳返回 None
     count = query("SELECT COUNT(*) cnt FROM agendas WHERE serial_no LIKE ?", (f"{ym}-%",))
     seq   = (count[0]["cnt"] if count else 0) + 1
