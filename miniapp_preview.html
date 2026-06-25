@@ -38,6 +38,15 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 .user-detail { font-size: 13px; color: rgba(255,255,255,0.85); }
 .user-role { font-size: 11px; color: rgba(255,255,255,0.45); }
 
+/* 侧边栏用户下拉菜单 */
+.sidebar-menu-item {
+  padding: 10px 16px; font-size: 13px; color: #333; cursor: pointer;
+  transition: background 0.15s; display: flex; align-items: center;
+}
+.sidebar-menu-item:hover { background: #f0f5ff; color: #1677ff; }
+.sidebar-menu-item-danger { color: #ff4d4f; }
+.sidebar-menu-item-danger:hover { background: #fff1f0; color: #ff4d4f; }
+
 /* ===== 主区域 ===== */
 .main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
 .topbar {
@@ -395,15 +404,30 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
   </div>
 
   <div class="sidebar-bottom" id="sidebar-dept-user">
-    <div class="user-info" id="sidebarUserInfo" style="cursor:pointer" onclick="toggleSidebarUser()">
-      <div class="user-avatar" id="sidebarAvatar">缪</div>
-      <div>
-        <div class="user-detail" id="sidebarName">场馆中心 缪逸飞</div>
-        <div class="user-role" id="sidebarRole">场馆中心</div>
-      </div>
+    <!-- 未登录状态 -->
+    <div id="sidebarNotLoggedIn" style="text-align:center">
+      <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:8px">未登录</div>
+      <button class="btn btn-sm" style="background:#1677ff;color:#fff;border:none;width:100%;border-radius:6px;cursor:pointer;font-size:13px;padding:8px" onclick="showLoginModal()">🔑 点击登录</button>
     </div>
-    <div id="sidebarLogout" style="display:none;text-align:center;padding:6px 0 0">
-      <button class="btn btn-sm" style="background:#ff4d4f;color:#fff;border:none;width:100%;border-radius:4px;cursor:pointer;font-size:12px" onclick="doLogout()">🚪 退出登录</button>
+    <!-- 已登录状态 -->
+    <div id="sidebarLoggedIn" style="display:none;position:relative">
+      <div class="user-info" id="sidebarUserInfo" style="cursor:pointer" onclick="toggleSidebarUser()">
+        <div class="user-avatar" id="sidebarAvatar" style="transition:0.2s">缪</div>
+        <div style="flex:1;min-width:0">
+          <div class="user-detail" id="sidebarName" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">场馆中心 缪逸飞</div>
+          <div class="user-role" id="sidebarRole">场馆中心</div>
+        </div>
+        <div id="sidebarUserArrow" style="font-size:10px;color:rgba(255,255,255,0.3);transition:0.2s">▼</div>
+      </div>
+      <!-- 下拉菜单 -->
+      <div id="sidebarUserMenu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.18);overflow:hidden;z-index:9999">
+        <div class="sidebar-menu-item" onclick="switchAccount()">
+          <span style="margin-right:6px">🔄</span>切换账号
+        </div>
+        <div class="sidebar-menu-item sidebar-menu-item-danger" onclick="doLogout()">
+          <span style="margin-right:6px">🚪</span>退出登录
+        </div>
+      </div>
     </div>
   </div>
 </aside>
@@ -1388,8 +1412,44 @@ function switchRole(role) {
 
 // ── 侧栏用户菜单：点击切换登出按钮 ──
 function toggleSidebarUser() {
-  const logout = document.getElementById('sidebarLogout');
-  logout.style.display = logout.style.display === 'none' ? '' : 'none';
+  const menu = document.getElementById('sidebarUserMenu');
+  const arrow = document.getElementById('sidebarUserArrow');
+  const avatar = document.getElementById('sidebarAvatar');
+  if (!menu || !arrow) return;
+  const isOpen = menu.style.display !== 'none';
+  menu.style.display = isOpen ? 'none' : 'block';
+  arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+  if (avatar) avatar.style.background = isOpen ? '#1677ff' : '#389e0d';
+}
+
+// 点击页面其他区域关闭下拉菜单
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('sidebarUserMenu');
+  const userInfo = document.getElementById('sidebarUserInfo');
+  if (!menu || !userInfo) return;
+  if (menu.style.display !== 'none' && !userInfo.contains(e.target) && !menu.contains(e.target)) {
+    menu.style.display = 'none';
+    const arrow = document.getElementById('sidebarUserArrow');
+    const avatar = document.getElementById('sidebarAvatar');
+    if (arrow) arrow.style.transform = '';
+    if (avatar) avatar.style.background = '#1677ff';
+  }
+});
+
+// ── 切换账号 ──
+function switchAccount() {
+  // 关闭下拉菜单
+  const menu = document.getElementById('sidebarUserMenu');
+  if (menu) menu.style.display = 'none';
+  const arrow = document.getElementById('sidebarUserArrow');
+  if (arrow) arrow.style.transform = '';
+  const avatar = document.getElementById('sidebarAvatar');
+  if (avatar) avatar.style.background = '#1677ff';
+  // 清除当前登录态并弹出登录框
+  clearSession();
+  refreshSidebarUser();
+  showLoginModal();
+  showToast('请重新登录');
 }
 
 // ── 退出登录 ──
@@ -1398,11 +1458,39 @@ async function doLogout() {
     try { await POST('/auth/logout'); } catch(e) {}
   }
   clearSession();
-  document.getElementById('sidebarLogout').style.display = 'none';
-  document.getElementById('sidebarName').textContent = '场馆中心 缪逸飞';
-  document.getElementById('sidebarRole').textContent = '场馆中心';
+  // 关闭下拉菜单
+  const menu = document.getElementById('sidebarUserMenu');
+  if (menu) menu.style.display = 'none';
+  const arrow = document.getElementById('sidebarUserArrow');
+  if (arrow) arrow.style.transform = '';
+  refreshSidebarUser();
+  // 显示登录页面（覆盖整个主区域）
+  showLoginPage();
   showToast('已退出登录');
-  navigate('home');
+}
+
+// ── 根据登录状态刷新侧边栏底部 ──
+function refreshSidebarUser() {
+  const notLoggedIn = document.getElementById('sidebarNotLoggedIn');
+  const loggedIn    = document.getElementById('sidebarLoggedIn');
+  if (!notLoggedIn || !loggedIn) return;
+
+  if (_token && _user) {
+    notLoggedIn.style.display = 'none';
+    loggedIn.style.display    = 'block';
+    // 更新用户信息
+    const nameEl = document.getElementById('sidebarName');
+    const roleEl = document.getElementById('sidebarRole');
+    const avatarEl = document.getElementById('sidebarAvatar');
+    const dept = _user.dept || '场馆中心';
+    const name = _user.real_name || _user.username || '用户';
+    if (nameEl) nameEl.textContent = dept + ' ' + name;
+    if (roleEl) roleEl.textContent = dept;
+    if (avatarEl) { avatarEl.textContent = name.charAt(0); avatarEl.style.background = '#1677ff'; }
+  } else {
+    notLoggedIn.style.display = 'block';
+    loggedIn.style.display    = 'none';
+  }
 }
 
 // ===== 统一导航（角色感知） =====
@@ -2058,7 +2146,7 @@ setTimeout(() => renderPoolTable(), 100);
 // ═══════════════════════════════════════════════════════════════
 const API = '/api';
 let _token = localStorage.getItem('agenda_token') || '';
-let _user  = null;
+let _user  = (() => { try { const s = localStorage.getItem('agenda_user'); return s ? JSON.parse(s) : null; } catch(e) { return null; } })();
 
 // ── 清除登录状态 ──
 function clearSession() {
@@ -2081,7 +2169,8 @@ async function apiCall(method, path, body) {
       // 401 未登录/过期 → 自动清理并弹登录
       if (r.status === 401) {
         clearSession();
-        showLoginModal();
+        refreshSidebarUser();
+        showLoginPage();
         showToast(d.msg || '未登录或登录已过期，请重新登录');
       }
       throw new Error(d.msg || '请求失败');
@@ -2396,6 +2485,41 @@ async function markNotifRead() {
   try { await POST('/notifications/read-all'); loadNotifications(); } catch(e) {}
 }
 
+// ── 登出后的全屏登录页面（初始界面） ──
+function showLoginPage() {
+  // 隐藏所有业务页面
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // 取消侧边栏高亮
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  // 显示全屏登录界面
+  let lp = document.getElementById('loginPage');
+  if (!lp) {
+    lp = document.createElement('div');
+    lp.id = 'loginPage';
+    lp.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1677ff 0%,#0050b3 100%)';
+    lp.innerHTML = `
+      <div style="text-align:center;color:#fff">
+        <div style="font-size:48px;margin-bottom:16px">🏟️</div>
+        <div style="font-size:24px;font-weight:700;margin-bottom:4px">北京市朝阳区体育局</div>
+        <div style="font-size:16px;opacity:0.8;margin-bottom:32px">议题全生命周期管理平台 V1.0</div>
+        <button onclick="hideLoginPage();showLoginModal()" style="background:#fff;color:#1677ff;border:none;border-radius:10px;padding:14px 48px;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.2);transition:transform 0.2s"
+          onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''">
+          🔑 登录系统
+        </button>
+        <div style="margin-top:48px;font-size:12px;opacity:0.5">© 2026 北京市朝阳区体育局 · 内部系统</div>
+      </div>`;
+    document.body.appendChild(lp);
+  }
+  lp.style.display = 'flex';
+  // 更新标题
+  document.getElementById('pageTitle').textContent = '议题全生命周期管理平台';
+}
+
+function hideLoginPage() {
+  const lp = document.getElementById('loginPage');
+  if (lp) lp.style.display = 'none';
+}
+
 // ── 登录弹窗 ──
 function showLoginModal() {
   let modal = document.getElementById('loginModal');
@@ -2542,11 +2666,9 @@ async function confirmRegister() {
   try {
     const data = await doRegister(u, p, n, d);
     document.getElementById('loginModal')?.remove();
+    hideLoginPage();
 
-    const nameEl = document.getElementById('sidebarName');
-    const roleEl = document.getElementById('sidebarRole');
-    if (nameEl) nameEl.textContent = (data.dept || '场馆中心') + ' ' + data.real_name;
-    if (roleEl) roleEl.textContent = data.dept || '场馆中心';
+    refreshSidebarUser();
 
     navigate('home');
     refreshAgendaList();
@@ -2579,12 +2701,10 @@ async function confirmLogin() {
     ]);
 
     document.getElementById('loginModal')?.remove();
+    hideLoginPage();
 
-    // 更新侧边栏显示（格式：部门 姓名）
-    const nameEl = document.getElementById('sidebarName');
-    const roleEl = document.getElementById('sidebarRole');
-    if (nameEl) nameEl.textContent = (data.dept || '场馆中心') + ' ' + data.real_name;
-    if (roleEl) roleEl.textContent = data.dept || '场馆中心';
+    // 更新侧边栏
+    refreshSidebarUser();
 
     // 跳转到首页并刷新数据
     navigate('home');
@@ -2618,9 +2738,14 @@ function showPage(pageId) {
 // ── 页面加载完成后初始化 ──
 window.addEventListener('DOMContentLoaded', function() {
   // 检查是否已有 token，若无则弹登录
+  // 根据登录状态刷新侧边栏
+  refreshSidebarUser();
+
   if (!_token) {
-    setTimeout(showLoginModal, 500);
+    // 未登录 → 显示全屏登录界面
+    setTimeout(showLoginPage, 300);
   } else {
+    // 已登录 → 加载数据
     loadStats();
     loadNotifications();
     loadMeetings();

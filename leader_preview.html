@@ -33,6 +33,15 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 .user-detail { font-size: 13px; color: rgba(255,255,255,0.85); }
 .user-role { font-size: 11px; color: rgba(255,255,255,0.45); }
 
+/* 侧边栏用户下拉菜单 */
+.sidebar-menu-item {
+  padding: 10px 16px; font-size: 13px; color: #333; cursor: pointer;
+  transition: background 0.15s; display: flex; align-items: center;
+}
+.sidebar-menu-item:hover { background: #f0f5ff; color: #1677ff; }
+.sidebar-menu-item-danger { color: #ff4d4f; }
+.sidebar-menu-item-danger:hover { background: #fff1f0; color: #ff4d4f; }
+
 /* ===== 主区域 ===== */
 .main { margin-left: 220px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
 .topbar {
@@ -200,12 +209,30 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
     <div class="sidebar-item" id="nav-stats" onclick="navigate('stats')"><span class="icon">📊</span>数据统计</div>
   </div>
 
-  <div class="sidebar-bottom">
-    <div class="user-info">
-      <div class="user-avatar">局</div>
-      <div>
-        <div class="user-detail">局领导</div>
-        <div class="user-role">局长办公会 · 审批权限</div>
+  <div class="sidebar-bottom" id="sidebar-dept-user">
+    <!-- 未登录状态 -->
+    <div id="sidebarNotLoggedIn" style="text-align:center">
+      <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:8px">未登录</div>
+      <button class="btn btn-sm" style="background:#1677ff;color:#fff;border:none;width:100%;border-radius:6px;cursor:pointer;font-size:13px;padding:8px" onclick="window.location.href='/'">🔑 点击登录</button>
+    </div>
+    <!-- 已登录状态 -->
+    <div id="sidebarLoggedIn" style="display:none;position:relative">
+      <div class="user-info" id="sidebarUserInfo" style="cursor:pointer" onclick="toggleSidebarUser()">
+        <div class="user-avatar" id="sidebarAvatar" style="transition:0.2s">局</div>
+        <div style="flex:1;min-width:0">
+          <div class="user-detail" id="sidebarName" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">局领导</div>
+          <div class="user-role" id="sidebarRole">局长办公会 · 审批权限</div>
+        </div>
+        <div id="sidebarUserArrow" style="font-size:10px;color:rgba(255,255,255,0.3);transition:0.2s">▼</div>
+      </div>
+      <!-- 下拉菜单 -->
+      <div id="sidebarUserMenu" style="display:none;position:absolute;bottom:100%;left:0;right:0;margin-bottom:8px;background:#fff;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.18);overflow:hidden;z-index:9999">
+        <div class="sidebar-menu-item" onclick="switchAccount()">
+          <span style="margin-right:6px">🔄</span>切换账号
+        </div>
+        <div class="sidebar-menu-item sidebar-menu-item-danger" onclick="doLogout()">
+          <span style="margin-right:6px">🚪</span>退出登录
+        </div>
       </div>
     </div>
   </div>
@@ -720,6 +747,94 @@ function leaderMinSign() {
   showToast('✍️ ' + title.substring(0, 20) + '... ' + msg);
   document.getElementById('leaderMinComment').value = '';
 }
+
+// ═══════════════════════════════════════════════════════════════
+//  侧边栏用户菜单（登录/切换/登出）
+// ═══════════════════════════════════════════════════════════════
+const API = '/api';
+let _token = localStorage.getItem('agenda_token') || '';
+let _user  = (() => { try { const s = localStorage.getItem('agenda_user'); return s ? JSON.parse(s) : null; } catch(e) { return null; } })();
+
+function clearSession() {
+  _token = '';
+  _user  = null;
+  localStorage.removeItem('agenda_token');
+  localStorage.removeItem('agenda_user');
+}
+
+function toggleSidebarUser() {
+  const menu = document.getElementById('sidebarUserMenu');
+  const arrow = document.getElementById('sidebarUserArrow');
+  const avatar = document.getElementById('sidebarAvatar');
+  if (!menu || !arrow) return;
+  const isOpen = menu.style.display !== 'none';
+  menu.style.display = isOpen ? 'none' : 'block';
+  arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+  if (avatar) avatar.style.background = isOpen ? '#1677ff' : '#389e0d';
+}
+
+// 点击页面其他区域关闭下拉菜单
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('sidebarUserMenu');
+  const userInfo = document.getElementById('sidebarUserInfo');
+  if (!menu || !userInfo) return;
+  if (menu.style.display !== 'none' && !userInfo.contains(e.target) && !menu.contains(e.target)) {
+    menu.style.display = 'none';
+    const arrow = document.getElementById('sidebarUserArrow');
+    const avatar = document.getElementById('sidebarAvatar');
+    if (arrow) arrow.style.transform = '';
+    if (avatar) avatar.style.background = '#1677ff';
+  }
+});
+
+function switchAccount() {
+  const menu = document.getElementById('sidebarUserMenu');
+  if (menu) menu.style.display = 'none';
+  const arrow = document.getElementById('sidebarUserArrow');
+  if (arrow) arrow.style.transform = '';
+  const avatar = document.getElementById('sidebarAvatar');
+  if (avatar) avatar.style.background = '#1677ff';
+  clearSession();
+  refreshSidebarUser();
+  window.location.href = '/';
+}
+
+async function doLogout() {
+  if (_token) {
+    try { await fetch(API + '/auth/logout', { method: 'POST', headers: { 'X-Token': _token, 'Content-Type': 'application/json' } }); } catch(e) {}
+  }
+  clearSession();
+  const menu = document.getElementById('sidebarUserMenu');
+  if (menu) menu.style.display = 'none';
+  const arrow = document.getElementById('sidebarUserArrow');
+  if (arrow) arrow.style.transform = '';
+  refreshSidebarUser();
+  window.location.href = '/';
+}
+
+function refreshSidebarUser() {
+  const notLoggedIn = document.getElementById('sidebarNotLoggedIn');
+  const loggedIn    = document.getElementById('sidebarLoggedIn');
+  if (!notLoggedIn || !loggedIn) return;
+  if (_token && _user) {
+    notLoggedIn.style.display = 'none';
+    loggedIn.style.display    = 'block';
+    const nameEl = document.getElementById('sidebarName');
+    const roleEl = document.getElementById('sidebarRole');
+    const avatarEl = document.getElementById('sidebarAvatar');
+    const dept = _user.dept || '场馆中心';
+    const name = _user.real_name || _user.username || '用户';
+    if (nameEl) nameEl.textContent = dept + ' ' + name;
+    if (roleEl) roleEl.textContent = dept;
+    if (avatarEl) { avatarEl.textContent = name.charAt(0); avatarEl.style.background = '#1677ff'; }
+  } else {
+    notLoggedIn.style.display = 'block';
+    loggedIn.style.display    = 'none';
+  }
+}
+
+// 页面加载时刷新侧边栏
+refreshSidebarUser();
 </script>
 
 </body>
