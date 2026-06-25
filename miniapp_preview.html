@@ -335,7 +335,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 #toast {
   display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
   background: rgba(0,0,0,0.75); color: #fff; padding: 12px 24px; border-radius: 8px;
-  font-size: 14px; z-index: 9999;
+  font-size: 14px; z-index: 999999;
 }
 
 /* ===== V1.3 角色切换器 ===== */
@@ -2601,7 +2601,7 @@ function showLoginModal() {
               <option value="体产中心">体产中心</option>
             </select>
           </div>
-          <button onclick="confirmRegister()" style="width:100%;background:#1677ff;color:#fff;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:600;cursor:pointer">
+          <button id="btnConfirmRegister" onclick="confirmRegister()" style="width:100%;background:#1677ff;color:#fff;border:none;border-radius:8px;padding:12px;font-size:15px;font-weight:600;cursor:pointer">
             注 册
           </button>
           <div style="margin-top:12px;font-size:12px;color:#bbb;text-align:center">
@@ -2659,7 +2659,7 @@ async function confirmRegister() {
   if (u.length < 3) { showToast('用户名至少 3 个字符'); return; }
   if (p.length < 6) { showToast('密码至少 6 个字符'); return; }
 
-  const btn = document.querySelector('#registerForm button');
+  const btn = document.getElementById('btnConfirmRegister');
   const origText = btn ? btn.textContent : '';
   if (btn) { btn.disabled = true; btn.textContent = '注册中...'; btn.style.opacity = '0.7'; }
 
